@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleDnsTestTool.Server.Utils
+namespace SimpleDnsServer.Utils
 {
     public class ProcessUtils
     {

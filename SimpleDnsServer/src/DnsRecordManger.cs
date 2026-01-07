@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 #nullable enable
-namespace SimpleDnsTestTool.Server
+namespace SimpleDnsServer
 {
     public class DnsRecordManger
     {

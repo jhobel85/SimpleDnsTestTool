@@ -1,5 +1,5 @@
 using Xunit;
-using SimpleDnsTestTool.Server;
+using SimpleDnsServer;
 
 namespace SimpleDnsTests
 {

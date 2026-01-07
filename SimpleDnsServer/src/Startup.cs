@@ -1,13 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-
-#nullable enable
-namespace SimpleDnsTestTool.Server
+﻿#nullable enable
+namespace SimpleDnsServer
 {
     public class Startup
     {

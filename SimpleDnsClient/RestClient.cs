@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Net;
-using System.Reflection.Metadata;
 using System.Text;
 
 namespace SimpleDnsClient
@@ -11,14 +6,14 @@ namespace SimpleDnsClient
     public class RestClient
     {
         public Guid SessionId { get; } = Guid.NewGuid();        
-        private string serverUrl;
+        private readonly string serverUrl;
 
         public RestClient(string ip, int apiPort, bool useIPv6 = false)
         {
-            this.serverUrl = BuildUrl(ip, apiPort, useIPv6);
+            serverUrl = BuildUrl(ip, apiPort, useIPv6);
             // Ensure /dns is always present as the base path
-            if (!this.serverUrl.EndsWith(Constants.DNS_ROOT, StringComparison.OrdinalIgnoreCase))
-                this.serverUrl += Constants.DNS_ROOT;
+            if (!serverUrl.EndsWith(Constants.DNS_ROOT, StringComparison.OrdinalIgnoreCase))
+                serverUrl += Constants.DNS_ROOT;
         }
 
         public void Register(string domain, string ip, bool registerWithSessionContext = true)
@@ -153,7 +148,7 @@ namespace SimpleDnsClient
 
         private string BuildUrl(string ip, int apiPort, bool useIPv6)
         {
-            if (System.Net.IPAddress.TryParse(ip, out var addr) && addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+            if (IPAddress.TryParse(ip, out var addr) && addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
                 return $"http://[{ip}]:{apiPort}/{Constants.DncControllerName}";
             return $"http://{ip}:{apiPort}/{Constants.DncControllerName}";
         }

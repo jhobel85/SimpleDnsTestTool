@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.VisualBasic;
-using SimpleDnsTestTool.Server;
+using SimpleDnsServer;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateSlimBuilder(args);

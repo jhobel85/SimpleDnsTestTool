@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SimpleDnsTestTool.Server.Utils
+namespace SimpleDnsServer.Utils
 {
     public class ServerUtils
     {
@@ -43,7 +38,7 @@ namespace SimpleDnsTestTool.Server.Utils
                 RedirectStandardError = true,
                 CreateNoWindow = true
             });
-            
+        
             // Wait for server to start or exit
             Thread.Sleep(3000);
             if (_serverProcess == null)
