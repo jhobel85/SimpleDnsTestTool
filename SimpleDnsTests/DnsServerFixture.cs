@@ -13,8 +13,8 @@ namespace SimpleDnsServer.Tests
 
         private void KillAnyRunningServer()
         {
-            ProcessUtils.KillAllServers(Constants.UdpPort, Constants.DNS_IP);
-            ProcessUtils.KillAllServers(Constants.ApiPort, Constants.DNS_IP);
+            ProcessUtils.KillAllServers(Constants.UdpPort/*, Constants.DNS_IP*/);
+            ProcessUtils.KillAllServers(Constants.ApiPort/*, Constants.DNS_IP*/);
         }
 
         public void Dispose()

@@ -3,7 +3,7 @@ using ARSoft.Tools.Net.Dns;
 using System.Net;
 
 #nullable enable
-namespace SimpleDnsServer;
+namespace SimpleDnsServer.Server;
 
 public class DnsUdpListener : BackgroundService
 {

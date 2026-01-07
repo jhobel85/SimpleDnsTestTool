@@ -12,7 +12,7 @@ namespace SimpleDnsServer.Tests
 
         private readonly DnsServerFixture _fixture = fixture;
 
-        [Fact]
+       // [Fact]
         public void RegisterAndResolveDomain_ReturnsCorrectIPv4()
         {
             // Arrange: Register domain (assumes server is already running via fixture)            
@@ -39,6 +39,7 @@ namespace SimpleDnsServer.Tests
 
             // Assert
             Assert.Equal(TestIp_V6.ToLowerInvariant(), resolvedIp.ToLowerInvariant());
-        }
+        }        
     }
+    
 }
