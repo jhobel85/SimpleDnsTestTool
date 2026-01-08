@@ -7,11 +7,11 @@ using Xunit;
 
 namespace SimpleDnsTests
 {
-    public class DnsApiControllerIntegrationTest : IClassFixture<WebApplicationFactory<SimpleDnsServer.Startup>>
+    public class DnsApiControllerIntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
 
-        public DnsApiControllerIntegrationTest(WebApplicationFactory<SimpleDnsServer.Startup> factory)
+        public DnsApiControllerIntegrationTest(WebApplicationFactory<Program> factory)
         {
             _client = factory.CreateClient(); //default dynamic port assignment
             

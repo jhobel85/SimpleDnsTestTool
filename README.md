@@ -10,12 +10,32 @@ Reliable Registration: By awaiting async registration methods, you ensure that a
 
 Test Stability: Async/await ensures that each step (register, resolve, unregister) completes in order, making your dual-stack tests pass consistently.
 
-# Rest API
-Register:
-curl -X POST "http://127.0.0.1:10060/dns/register?domain=example.com&ip=1.2.3.4"
-Resolve:
-curl -X POST "http://127.0.0.1:10060/dns/resolve?domain=example.com"
+# How to start the server
+1] run SimpleDnsServer.exe
+- IPv4 will be localhost 172.0.0.1, UDP port 53 and API port 60
+- IPv6 will be localhost [::1], UDP port 53 and API port 60
+2] run SimpleDnsServer.exe --ip any --apiPort 10053 --udpPort 10060,
+- IPv4 will be 0.0.0.0 with custom ports
+- IPv6 will be [::] with custom ports
+- With option "--ip localhost" - there can be defined localhost IPv4/IPv6 with custom ports.
 
+# Rest API test
+Register and resovle (IPv4):
+curl -X POST "http://127.0.0.1:60/dns/register?domain=ip4.com&ip=1.2.3.4"
+curl -X GET "http://127.0.0.1:60/dns/resolve?domain=ip4.com"
+
+Register and resolve (IPv6):
+curl -g -X POST "http://[::1]:60/dns/register?domain=ip6.com&ip=fd00::101"
+curl -g -X GET "http://[::1]:60/dns/resolve?domain=ip6.com"
+
+The server resolves the name internally, without using DNS protocol. No UDP packets are created.
+Resolve via nslookup (work only with port 53):
+nslookup ip4.com 127.0.0.1
+nslookup ip6.com ::1
+
+IP tunneling also works but it takes more time and could finish with timetout
+nslookup ip6.com 127.0.0.1
+nslookup ip4.com ::1
 
 
 

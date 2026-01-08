@@ -1,25 +1,22 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using SimpleDnsServer;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+// Entry point for running the server
+CreateHostBuilder(args).Build().Run();
 
-var app = builder.Build();
-HostingAbstractionsHostExtensions.Run(CreateHostBuilder(args).Build());
-
-static IHostBuilder CreateHostBuilder(string[] args)
+public partial class Program
 {
-    IConfigurationRoot config = CommandLineConfigurationExtensions.AddCommandLine((IConfigurationBuilder)new ConfigurationBuilder(), args).Build();
-    string url = DnsConst.ResolveUrl(config);
-    string port = DnsConst.ResolveApiPort(config);
-    return GenericHostBuilderExtensions.ConfigureWebHostDefaults(Host.CreateDefaultBuilder(args), (Action<IWebHostBuilder>)(webBuilder =>
+    public static IHostBuilder CreateHostBuilder(string[] args)
     {
-        WebHostBuilderExtensions.UseStartup<Startup>(webBuilder);
-        HostingAbstractionsWebHostBuilderExtensions.UseUrls(webBuilder, new string[1]
+        IConfigurationRoot config = CommandLineConfigurationExtensions.AddCommandLine((IConfigurationBuilder)new ConfigurationBuilder(), args).Build();        
+        string port = DnsConst.ResolveApiPort(config);
+        return GenericHostBuilderExtensions.ConfigureWebHostDefaults(Host.CreateDefaultBuilder(args), (Action<IWebHostBuilder>)(webBuilder =>
         {
-        url
-        });
-        WebHostBuilderKestrelExtensions.UseKestrel(webBuilder, (Action<KestrelServerOptions>)(options => options.ListenAnyIP(int.Parse(port))));
-    }));
+            WebHostBuilderExtensions.UseStartup<Startup>(webBuilder);
+            webBuilder.UseUrls(DnsConst.ResolveUrl(config), DnsConst.ResolveUrlV6(config));
+            WebHostBuilderKestrelExtensions.UseKestrel(webBuilder, (Action<KestrelServerOptions>)(options => options.ListenAnyIP(int.Parse(port))));
+        }));
+    }
 }
 
 
