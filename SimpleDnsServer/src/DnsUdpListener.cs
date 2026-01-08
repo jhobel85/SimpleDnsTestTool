@@ -2,24 +2,22 @@
 using ARSoft.Tools.Net.Dns;
 using System.Net;
 using System.Net.Sockets;
-
-#nullable enable
-namespace SimpleDnsServer;
-
-
 using System.Threading;
 using Microsoft.Extensions.Logging;
+
+#nullable enable //compiler will warn if might be dereferencing a variable that could be null
+namespace SimpleDnsServer;
 
 public class DnsUdpListener : BackgroundService
 {
     private readonly DnsServer udpServer;
-    private readonly DnsRecordManger recordManager;
+    private readonly IDnsRecordManger recordManager;
     // Limit the number of concurrent DNS query handlers (tune as needed)
     private static readonly SemaphoreSlim QuerySemaphore = new(16); // e.g., max 16 concurrent queries
 
     private readonly ILogger<DnsUdpListener> _logger;
 
-    public DnsUdpListener(DnsRecordManger recordManager, IConfiguration config, ILogger<DnsUdpListener> logger)
+    public DnsUdpListener(IDnsRecordManger recordManager, IConfiguration config, ILogger<DnsUdpListener> logger)
     {            
         string ipString = DnsConst.ResolveDnsIp(config);
         int port = int.Parse(DnsConst.ResolveUdpPort(config));
@@ -128,10 +126,4 @@ public class DnsUdpListener : BackgroundService
         base.Dispose();
         udpServer?.Stop();
     }
-
-    // Logging header removed for performance
-
-    // Logging questions removed for performance
-
-    // Logging answers removed for performance
 }

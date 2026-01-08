@@ -136,9 +136,9 @@ namespace SimpleDnsServer.Utils
             return ret;
         }
 
-        public static bool IsServerRunning(int portNr)
+        public static bool IsServerRunning(int portNr, string? ipAddress = null)
         {
-            var procesIds = FindServerProcessIDs(portNr);
+            var procesIds = FindServerProcessIDs(portNr, ipAddress);
             var ret = procesIds.Count > 0;
             return ret;
         }
