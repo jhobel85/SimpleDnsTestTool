@@ -31,11 +31,9 @@ curl -g -X GET "http://[::1]:60/dns/resolve?domain=ip6.com"
 The server resolves the name internally, without using DNS protocol. No UDP packets are created.
 Resolve via nslookup (work only with port 53):
 nslookup ip4.com 127.0.0.1
-nslookup ip6.com ::1
+nslookup -q=AAAA ip6.com ::1
+(nslookup ip6.com ::1 // nslookup tries both IPv4 and IPv6 when you specify ::1)
 
-IP tunneling also works but it takes more time and could finish with timetout
-nslookup ip6.com 127.0.0.1
-nslookup ip4.com ::1
 
 
 

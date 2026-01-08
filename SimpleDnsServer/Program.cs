@@ -14,7 +14,7 @@ public partial class Program
         {
             WebHostBuilderExtensions.UseStartup<Startup>(webBuilder);
             webBuilder.UseUrls(DnsConst.ResolveUrl(config), DnsConst.ResolveUrlV6(config));
-            WebHostBuilderKestrelExtensions.UseKestrel(webBuilder, (Action<KestrelServerOptions>)(options => options.ListenAnyIP(int.Parse(port))));
+            //WebHostBuilderKestrelExtensions.UseKestrel(webBuilder, (Action<KestrelServerOptions>)(options => options.ListenAnyIP(int.Parse(port))));
         }));
     }
 }

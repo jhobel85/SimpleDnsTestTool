@@ -19,14 +19,14 @@ public class DnsUdpListener : BackgroundService
 
     public DnsUdpListener(IDnsRecordManger recordManager, IConfiguration config, ILogger<DnsUdpListener> logger)
     {            
-        //string ipString = DnsConst.ResolveDnsIp(config);
+        string ipString = DnsConst.ResolveDnsIp(config);
         string ipStringV6 = DnsConst.ResolveDnsIpV6(config);
         int port = int.Parse(DnsConst.ResolveUdpPort(config));
         this.recordManager = recordManager;
         _logger = logger;
 
         // Best effort dual-stack: bind both IPv4 and IPv6 endpoints
-       // var transportV4 = new UdpServerTransport(new IPEndPoint(IPAddress.Parse(ipString), port));
+        var transportV4 = new UdpServerTransport(new IPEndPoint(IPAddress.Parse(ipString), port));
         var transportV6 = new UdpServerTransport(new IPEndPoint(IPAddress.Parse(ipStringV6), port));
         
         try
@@ -34,10 +34,10 @@ public class DnsUdpListener : BackgroundService
             var socketField = typeof(UdpServerTransport).GetField("_udpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (socketField != null)
             {
-                //var udpClientV4 = socketField.GetValue(transportV4) as UdpClient;
+                var udpClientV4 = socketField.GetValue(transportV4) as UdpClient;
                 var udpClientV6 = socketField.GetValue(transportV6) as UdpClient;
                 
-                //udpClientV4?.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, DnsConst.UDP_BUFFER);
+                udpClientV4?.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, DnsConst.UDP_BUFFER);
                 udpClientV6?.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, DnsConst.UDP_BUFFER);
             }
         }
@@ -46,7 +46,7 @@ public class DnsUdpListener : BackgroundService
             _logger.LogError(ex, "[DnsUdpListener] Could not set UDP socket buffer size");
         }
 
-        udpServer = new DnsServer([/*transportV4,*/ transportV6]);
+        udpServer = new DnsServer([transportV4, transportV6]);
         udpServer.QueryReceived += new AsyncEventHandler<QueryReceivedEventArgs>(OnQueryReceived);
     }
 
