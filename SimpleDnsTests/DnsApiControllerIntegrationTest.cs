@@ -43,5 +43,26 @@ namespace SimpleDnsTests
             var content = await response.Content.ReadAsStringAsync();
             Assert.Contains("1.2.3.4", content);
         }
+
+        [Fact]
+        public async Task GetAllEntries_ReturnsBothIPv4AndIPv6()
+        {
+            // Arrange: Register IPv4 and IPv6 records
+            var registerV4 = await _client.PostAsync("/dns/register?domain=example.com&ip=1.2.3.4", null);
+            registerV4.EnsureSuccessStatusCode();
+            var registerV6 = await _client.PostAsync("/dns/register?domain=ipv6.com&ip=2001:db8::1", null);
+            registerV6.EnsureSuccessStatusCode();
+
+            // Act: Call the GetAllEntries endpoint
+            var response = await _client.GetAsync("/dns/entries");
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("1.2.3.4", content); // IPv4
+            Assert.Contains("2001:db8::1", content); // IPv6
+            Assert.Contains("example.com", content);
+            Assert.Contains("ipv6.com", content);
+        }
     }
 }

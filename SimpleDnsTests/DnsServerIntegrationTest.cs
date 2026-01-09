@@ -18,7 +18,7 @@ namespace SimpleDnsServer.Tests
         public async Task RegisterAndResolveDomain_ReturnsCorrectIPv4()
         {
             // Arrange: Register domain (assumes server is already running via fixture)
-            string dns_ip = DnsConst.DNS_IP;
+            string dns_ip = DnsConst.GetDnsIp();
             var dnsClient = new RestClient(dns_ip, DnsConst.ApiPort);
             await dnsClient.RegisterAsync(TestDomain_V4, TestIp_V4);
             // Act: Send DNS query
@@ -32,7 +32,7 @@ namespace SimpleDnsServer.Tests
         public async Task RegisterAndResolveDomain_ReturnsCorrectIPv6()
         {
             // Arrange: Register domain (assumes server is already running via fixture)
-            string dns_ip = DnsConst.DNS_IPv6;
+            string dns_ip = DnsConst.GetDnsIpV6();
             var dnsClient = new RestClient(dns_ip, DnsConst.ApiPort, useIPv6: true);
             await dnsClient.RegisterAsync(TestDomain_V6, TestIp_V6);
 

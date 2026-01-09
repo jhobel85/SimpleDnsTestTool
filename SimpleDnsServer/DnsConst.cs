@@ -14,52 +14,43 @@ public static class DnsConst
     // Try to increase UDP socket buffer size using reflection (ARSoft.Tools.Net does not expose Socket)
     public const int UDP_BUFFER = 8 * 1024 * 1024; //8MB
 
-    public enum DnsIpMode
-    {
-        Any,
-        Localhost,
-        Custom
-    }
-
     private const string ipKey = "ip";
     private const string ip6Key = "ip6";
     private const string apiPortKey = "apiPort";
     private const string udpPortKey = "udpPort";
 
-    public static string GetDnsIp(DnsIpMode mode, IConfiguration config)
+    public static string GetDnsIp(DnsIpMode mode = DnsIpMode.Localhost, IConfiguration config = null)
     {
         return mode switch
         {
             DnsIpMode.Any => "0.0.0.0",
             DnsIpMode.Localhost => "127.0.0.1",
-            DnsIpMode.Custom => config[ipKey] ?? "127.0.0.1",
+            DnsIpMode.Custom => config?[ipKey] ?? "127.0.0.1",
             _ => "127.0.0.1"
         };
     }
 
-    public static string GetDnsIpV6(DnsIpMode mode, IConfiguration config)
+    public static string GetDnsIpV6(DnsIpMode mode = DnsIpMode.Localhost, IConfiguration config = null)
     {
         return mode switch
         {
             DnsIpMode.Any => "::",
             DnsIpMode.Localhost => "::1",
-            DnsIpMode.Custom => config[ip6Key] ?? "::1",
+            DnsIpMode.Custom => config?[ip6Key] ?? "::1",
             _ => "::1"
         };
     }
 
     public static string ResolveDnsIp(IConfiguration config)
     {
-        var modeStr = config["ipMode"];
-        DnsIpMode mode = Enum.TryParse(modeStr, out DnsIpMode parsed) ? parsed : DnsIpMode.Localhost;
-        return GetDnsIp(mode, config);
+        // Always use Custom mode when config is provided
+        return GetDnsIp(DnsIpMode.Custom, config);
     }
 
     public static string ResolveDnsIpV6(IConfiguration config)
     {
-        var modeStr = config["ip6Mode"];
-        DnsIpMode mode = Enum.TryParse(modeStr, out DnsIpMode parsed) ? parsed : DnsIpMode.Localhost;
-        return GetDnsIpV6(mode, config);
+        // Always use Custom mode when config is provided
+        return GetDnsIpV6(DnsIpMode.Custom, config);
     }
 
     public static string ResolveApiPort(IConfigurationRoot config) => config[apiPortKey] ?? ApiPort.ToString();

@@ -67,4 +67,9 @@ public class DnsRecordManger : IDnsRecordManger
         sessions.AddOrUpdate(key, _ => [domain],
             (_, bag) => { bag.Add(domain); return bag; });
     }
+
+    public IEnumerable<RestApi.DnsEntryDto> GetAllEntries()
+    {
+        return records.Select(kvp => new RestApi.DnsEntryDto { Domain = kvp.Key, Ip = kvp.Value }).ToList();
+    }
 }

@@ -13,15 +13,15 @@ namespace SimpleDnsServer.Tests
 
         private void KillAnyRunningServer()
         {
-            ProcessUtils.KillAllServers(DnsConst.UdpPort, DnsConst.DNS_IP);
-            ProcessUtils.KillAllServers(DnsConst.ApiPort, DnsConst.DNS_IP);
-            ProcessUtils.KillAllServers(DnsConst.UdpPort, DnsConst.DNS_IPv6);
-            ProcessUtils.KillAllServers(DnsConst.ApiPort, DnsConst.DNS_IPv6);
+            ProcessUtils.KillAllServers(DnsConst.UdpPort, DnsConst.GetDnsIp());
+            ProcessUtils.KillAllServers(DnsConst.ApiPort, DnsConst.GetDnsIp());
+            ProcessUtils.KillAllServers(DnsConst.UdpPort, DnsConst.GetDnsIpV6());
+            ProcessUtils.KillAllServers(DnsConst.ApiPort, DnsConst.GetDnsIpV6());
 
-            WaitForPortToBeFree(DnsConst.UdpPort, DnsConst.DNS_IP);
-            WaitForPortToBeFree(DnsConst.ApiPort, DnsConst.DNS_IP);
-            WaitForPortToBeFree(DnsConst.UdpPort, DnsConst.DNS_IPv6);
-            WaitForPortToBeFree(DnsConst.ApiPort, DnsConst.DNS_IPv6);
+            WaitForPortToBeFree(DnsConst.UdpPort, DnsConst.GetDnsIp());
+            WaitForPortToBeFree(DnsConst.ApiPort, DnsConst.GetDnsIp());
+            WaitForPortToBeFree(DnsConst.UdpPort, DnsConst.GetDnsIpV6());
+            WaitForPortToBeFree(DnsConst.ApiPort, DnsConst.GetDnsIpV6());
 
         }
 

@@ -83,5 +83,19 @@ namespace SimpleDnsTests
             Assert.NotNull(result);
             Assert.Equal(2, result.Value);
         }
+
+        [Fact]
+        public void GetAllEntries_ReturnsOkWithEntries()
+        {
+            var entries = new[]
+            {
+                new DnsEntryDto { Domain = "example.com", Ip = "1.2.3.4" },
+                new DnsEntryDto { Domain = "test.com", Ip = "5.6.7.8" }
+            };
+            _mockRecordManager.Setup(m => m.GetAllEntries()).Returns(entries);
+            var actionResult = _controller.GetAllEntries();
+            var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+            Assert.Equal(entries, okResult.Value);
+        }
     }
 }

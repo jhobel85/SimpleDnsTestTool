@@ -17,8 +17,8 @@ namespace SimpleDnsServer.Tests
         public async Task RegisterAndResolve_BothIPv4AndIPv6_Success()
         {
             // Arrange
-            string dns_ip_v4 = DnsConst.DNS_IP;
-            string dns_ip_v6 = DnsConst.DNS_IPv6;
+            string dns_ip_v4 = DnsConst.GetDnsIp(DnsIpMode.Localhost);
+            string dns_ip_v6 = DnsConst.GetDnsIpV6(DnsIpMode.Localhost);
             var dnsClientV4 = new RestClient(dns_ip_v4, DnsConst.ApiPort);
             var dnsClientV6 = new RestClient(dns_ip_v6, DnsConst.ApiPort, useIPv6: true);
 
@@ -60,8 +60,8 @@ namespace SimpleDnsServer.Tests
                 (domain: "multi6g.local", ip: "fd00::117")
             };
 
-            string dns_ip_v4 = DnsConst.DNS_IP;
-            string dns_ip_v6 = DnsConst.DNS_IPv6;
+            string dns_ip_v4 = DnsConst.GetDnsIp(DnsIpMode.Localhost);
+            string dns_ip_v6 = DnsConst.GetDnsIpV6(DnsIpMode.Localhost);
             var dnsClientV4 = new RestClient(dns_ip_v4, DnsConst.ApiPort);
             var dnsClientV6 = new RestClient(dns_ip_v6, DnsConst.ApiPort, useIPv6: true);
 

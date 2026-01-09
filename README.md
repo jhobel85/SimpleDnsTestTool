@@ -20,21 +20,25 @@ Test Stability: Async/await ensures that each step (register, resolve, unregiste
 - If any of parameters not be specified default values be used.
 
 
-# Rest API test on localhost
-IPv4 Register and resovle:
+# Rest API tests on localhost
+## IPv4 Register and resovle:
 curl -X POST "http://127.0.0.1:60/dns/register?domain=ip4.com&ip=1.2.3.4"
 curl -X GET "http://127.0.0.1:60/dns/resolve?domain=ip4.com"
 
-IPv6 Register and resolve:
+## IPv6 Register and resolve:
 curl -g -X POST "http://[::1]:60/dns/register?domain=ip6.com&ip=fd00::101"
 curl -g -X GET "http://[::1]:60/dns/resolve?domain=ip6.com"
 
-PowerShell syntax:
+## Show All entries
+curl -g -X GET "http://[::1]:60/dns/entries"
+
+## PowerShell syntax:
 Invoke-WebRequest -Method POST "http://[::1]:60/dns/register?domain=ip6.com&ip=fd00::101"
 Invoke-WebRequest -Method GET "http://[::1]:60/dns/resolve?domain=ip6.com"
 
+## See DNS packets in Wireshark
 The server resolves the name internally, without using DNS protocol. No UDP packets are created.
-Resolve via nslookup (work only with port 53):
+Therfore Resolve via nslookup (work only with port 53):
 nslookup ip4.com 127.0.0.1
 nslookup -q=AAAA ip6.com ::1
 (nslookup ip6.com ::1 // nslookup tries both IPv4 and IPv6 when you specify ::1)

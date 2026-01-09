@@ -57,6 +57,15 @@ public class DnsApiController(IDnsRecordManger recordManger) : ControllerBase
         return (IActionResult)Ok(str ?? "");
     }
 
+
+    [HttpGet("entries")]
+    public ActionResult<IEnumerable<DnsEntryDto>> GetAllEntries()
+    {
+        Console.WriteLine("I will try get all DNS entries");
+        var entries = recordManger.GetAllEntries();
+        return Ok(entries);
+    }
+
     [HttpGet("count")]
     public IActionResult RecordsCount()
     {
