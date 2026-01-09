@@ -26,7 +26,7 @@ namespace SimpleDnsServer.Utils
                 UseShellExecute = false//process is started as a child process
             };
 
-            Process cmd = new Process { StartInfo = startInfo };
+            Process cmd = new() { StartInfo = startInfo };
             string cmdError = string.Empty;
             try
             {

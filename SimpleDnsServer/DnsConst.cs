@@ -13,26 +13,25 @@ public static class DnsConst
     // Try to increase UDP socket buffer size using reflection (ARSoft.Tools.Net does not expose Socket)
     public const int UDP_BUFFER = 8 * 1024 * 1024; //8MB
 
-    public const string DNS_IP = "127.0.0.1"; //localhost
-    public const string DNS_IP_ANY = "0.0.0.0";
-    
+    //public const string DNS_IP = "0.0.0.0";   //any
+    public const string DNS_IP = "127.0.0.1"; //localhost        
+    //public const string DNS_IP = "192.168.50.1"; //example local network IP
+            
+    //public const string DNS_IPv6 = "::"; //any
     public const string DNS_IPv6 = "::1";//localhost
-    public const string DNS_IPv6_ANY = "::";
+    //public const string DNS_IPv6 = "fd00:50::1"; //example local network IP       
 
-    //private const string IP_OPTION = "localhost";
-    //private const string IP_OPTION = "any";
     private const string ipKey = "ip"; // may be only "localhost" or "any"
+    private const string ip6Key = "ip6";
+    
     private const string apiPortKey = "apiPort";
     private const string udpPortKey = "udpPort";
 
-    //public static string URL = "http://" + DNS_IP + ":" + ApiPort;
+    public static string ResolveDnsIp(IConfiguration config) => config[ipKey] ?? DNS_IP;
+
+    public static string ResolveDnsIpV6(IConfiguration config) => config[ip6Key] ?? DNS_IPv6;
 
     public static string ResolveApiPort(IConfigurationRoot config) => config[apiPortKey] ?? ApiPort.ToString();
-
-    public static string ResolveDnsIp(IConfiguration config) => config[ipKey] == "any" ? DNS_IP_ANY : DNS_IP;
-
-    public static string ResolveDnsIpV6(IConfiguration config) => config[ipKey] == "any" ? DNS_IPv6_ANY: DNS_IPv6;
-
     public static string ResolveUdpPort(IConfiguration config) => config[udpPortKey] ?? UdpPort.ToString();
 
     public static string ResolveUrl(IConfigurationRoot config)
