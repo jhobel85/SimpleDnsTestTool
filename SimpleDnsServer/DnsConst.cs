@@ -20,6 +20,34 @@ public static class DnsConst
     private const string apiPortKey = "apiPort";
     private const string udpPortKey = "udpPort";
 
+    #if SIMPLE_DNS_TESTS
+    private const bool DEFAULT_ENABLE_HTTP = true; // HTTP enabled by default for tests
+    #else
+    private const bool DEFAULT_ENABLE_HTTP = false; // HTTP disabled by default for production
+    #endif
+
+    /// <summary>
+    /// Determines if HTTP endpoints should be enabled based on config/args. Default: disabled.
+    /// Enable with --http, --http=true, or --http=1
+    /// </summary>
+    public static bool IsHttpEnabled(IConfiguration config, string[] args)
+    {
+        var httpValue = config["http"];
+        if (!string.IsNullOrEmpty(httpValue))
+        {
+            if (bool.TryParse(httpValue, out var parsed))
+                return parsed;
+            if (string.Equals(httpValue, "1"))
+                return true;
+        }
+        else if (args != null && args.Any(a => a.Equals("--http", StringComparison.OrdinalIgnoreCase)))
+        {
+            // Support for --http as a flag
+            return true;
+        }
+        return DEFAULT_ENABLE_HTTP;
+    }
+
     public static string GetDnsIp(DnsIpMode mode = DnsIpMode.Localhost, IConfiguration config = null)
     {
         return mode switch

@@ -1,3 +1,42 @@
+# Enabling HTTPS for Local Development
+
+To run the server and tests with HTTPS endpoints locally, you must trust the ASP.NET Core development certificate on your machine. This allows your server to listen on `https://localhost` without browser or client warnings.
+
+## Steps to Enable HTTPS
+
+1. **Trust the ASP.NET Core development certificate:**
+
+	Open a terminal and run:
+
+	```sh
+	dotnet dev-certs https --trust
+	```
+
+	- On Windows, this will prompt you to trust the certificate. Click 'Yes' to confirm.
+	- The certificate is stored in your user profile's certificate store (not as a file in your project).
+	- You can view it in the Windows Certificate Manager under `Current User > Personal > Certificates` as `ASP.NET Core HTTPS development certificate`.
+
+2. **Ensure your server is configured to listen on HTTPS:**
+
+	The project is set up to listen on both HTTP and HTTPS by default. See `Properties/launchSettings.json` for the `applicationUrl` entry:
+
+	```json
+	"applicationUrl": "http://localhost:5144;https://localhost:7144"
+	```
+
+3. **Run the server:**
+
+	You can now run the server and access it via both HTTP and HTTPS URLs.
+
+4. **Testing with HTTPS:**
+
+	When using tools like `curl`, add the `-k` flag to ignore certificate validation (for self-signed/dev certs):
+
+	```sh
+	curl -k https://localhost:7144/dns/resolve?domain=example.com
+	```
+
+---
 # SimpleDnsTestTool Overview
 
 SimpleDnsTestTool is a dual-stack DNS server and client toolkit designed for testing and development. It supports both IPv4 and IPv6 traffic, allowing reliable DNS record registration, resolution, and unregistration. The project emphasizes test stability and reliability through async/await patterns, ensuring operations complete in order and tests run consistently across network stacks.

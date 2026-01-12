@@ -10,13 +10,20 @@ public class RestClient
     private readonly string serverUrl;
     private readonly IHttpClient httpClient;
 
-    public RestClient(string ip, int apiPort, IHttpClient? httpClient = null)
+        /// <summary>
+        /// Create a new RestClient.
+        /// </summary>
+        /// <param name="ip">Server IP address</param>
+        /// <param name="apiPort">API port</param>
+        /// <param name="protocol">"http" or "https" (default: "https")</param>
+        /// <param name="httpClient">Optional custom IHttpClient</param>
+    public RestClient(string ip, int apiPort, string protocol = "http", IHttpClient? httpClient = null)
     {
-        serverUrl = BuildUrl(ip, apiPort);
+        serverUrl = BuildUrl(ip, apiPort, protocol);
         // Ensure /dns is always present as the base path
         if (!serverUrl.EndsWith(DnsConst.DNS_ROOT, StringComparison.OrdinalIgnoreCase))
             serverUrl += DnsConst.DNS_ROOT;
-        this.httpClient = httpClient ?? new DefaultHttpClient();
+        this.httpClient = httpClient ?? new DefaultHttpClient(); //can be used either for HTTP or HTTPS
     }
 
     public async Task RegisterAsync(string domain, string ip, bool registerWithSessionContext)
@@ -120,10 +127,11 @@ public class RestClient
         return int.TryParse(result, out var count) ? count : 0;
     }
 
-    private static string BuildUrl(string ip, int apiPort)
+    private static string BuildUrl(string ip, int apiPort, string protocol)
     {
+        protocol = protocol?.ToLowerInvariant() == "http" ? "http" : "https";
         if (IPAddress.TryParse(ip, out var addr) && addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
-            return $"https://[{ip}]:{apiPort}/{DnsConst.DncControllerName}";
-        return $"https://{ip}:{apiPort}/{DnsConst.DncControllerName}";
+            return $"{protocol}://[{ip}]:{apiPort}/{DnsConst.DncControllerName}";
+        return $"{protocol}://{ip}:{apiPort}/{DnsConst.DncControllerName}";
     }
 }

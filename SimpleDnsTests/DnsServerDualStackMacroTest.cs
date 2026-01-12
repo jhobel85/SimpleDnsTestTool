@@ -1,11 +1,11 @@
 using System.Net;
 using System.Threading.Tasks;
 using Xunit;
-using SimpleDnsClient;
+using SimpleDnsClientMacro;
 
 namespace SimpleDnsServer.Tests
 {    
-    public class DnsServerDualStackTest(DnsServerFixture fixture) : IClassFixture<DnsServerFixture>
+    public class DnsServerDualStackMacro(DnsServerFixture fixture) : IClassFixture<DnsServerFixture>
     {
         private const string TestDomain_V4 = "dualstack4.local";
         private const string TestIp_V4 = "192.168.1.101";
@@ -48,7 +48,7 @@ namespace SimpleDnsServer.Tests
                 (domain: "multi4e.local", ip: "192.168.1.115"),
                 (domain: "multi4f.local", ip: "192.168.1.116"),
                 (domain: "multi4g.local", ip: "192.168.1.117"),
-                                (domain: "multi4q.local", ip: "192.168.1.111"),
+                (domain: "multi4q.local", ip: "192.168.1.111"),
                 (domain: "multi4w.local", ip: "192.168.1.112"),
                 (domain: "multi4c.local", ip: "192.168.1.113"),
                 (domain: "multi4p.local", ip: "192.168.1.114"),
@@ -145,5 +145,35 @@ namespace SimpleDnsServer.Tests
                 
             }
         }
+
+            [Theory]
+            [InlineData("http", false)]
+            [InlineData("https", false)]
+            [InlineData("http", true)]
+            [InlineData("https", true)]
+            public async Task RegisterAndResolve_Protocol_V4_V6_Success(string protocol, bool useV6)
+            {
+                string dns_ip = useV6 ? DnsConst.GetDnsIpV6(DnsIpMode.Localhost) : DnsConst.GetDnsIp(DnsIpMode.Localhost);
+                string testDomain = useV6 ? "dualstack6.local" : "dualstack4.local";
+                string testIp = useV6 ? "fd00::101" : "192.168.1.101";
+                int apiPort = protocol == "https" ? DnsConst.ApiHttps : DnsConst.ApiHttp;
+                var dnsClient = new RestClient(dns_ip, apiPort, protocol);
+
+                await dnsClient.RegisterAsync(testDomain, testIp, true);
+
+                string resolvedIp;
+                if (useV6)
+                    resolvedIp = await ClientUtils.SendDnsQueryIPv6Async(dns_ip, testDomain, DnsConst.UdpPort);
+                else
+                    resolvedIp = await ClientUtils.SendDnsQueryIPv4Async(dns_ip, testDomain, DnsConst.UdpPort);
+
+                if (useV6)
+                    Assert.Equal(testIp.ToLowerInvariant(), resolvedIp.ToLowerInvariant());
+                else
+                    Assert.Equal(testIp, resolvedIp);
+
+                // Cleanup
+                await dnsClient.UnregisterAsync(testDomain);
+            }
     }
 }

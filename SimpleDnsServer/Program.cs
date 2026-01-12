@@ -15,13 +15,15 @@ namespace SimpleDnsServer
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             IConfigurationRoot config = CommandLineConfigurationExtensions.AddCommandLine((IConfigurationBuilder)new ConfigurationBuilder(), args).Build();
-            var urls = new[]
+            var urlList = new List<string>();
+            if (DnsConst.IsHttpEnabled(config, args))
             {
-                DnsConst.ResolveHttpUrl(config),
-                DnsConst.ResolveHttpsUrl(config),
-                DnsConst.ResolveHttpUrlV6(config),
-                DnsConst.ResolveHttpsUrlV6(config)
-            };
+                urlList.Add(DnsConst.ResolveHttpUrl(config));
+                urlList.Add(DnsConst.ResolveHttpUrlV6(config));
+            }
+            urlList.Add(DnsConst.ResolveHttpsUrl(config));
+            urlList.Add(DnsConst.ResolveHttpsUrlV6(config));
+            var urls = urlList.ToArray();
             return GenericHostBuilderExtensions.ConfigureWebHostDefaults(Host.CreateDefaultBuilder(args), (Action<IWebHostBuilder>)(webBuilder =>
             {
                 WebHostBuilderExtensions.UseStartup<Startup>(webBuilder);
