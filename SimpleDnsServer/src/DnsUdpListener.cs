@@ -33,7 +33,7 @@ public class DnsUdpListener : BackgroundService
         SetUdpSocketBufferSafe(transportV4);
         SetUdpSocketBufferSafe(transportV6);
 
-        udpServer = new DnsServer(new[] { transportV4, transportV6 });
+        udpServer = new DnsServer(transportV4, transportV6);
         udpServer.QueryReceived += new AsyncEventHandler<QueryReceivedEventArgs>(OnQueryReceived);
     }
 
@@ -41,6 +41,11 @@ public class DnsUdpListener : BackgroundService
     {
         try
         {
+            // SonarQube S3011: Reflection is used here intentionally to access the private _udpClient field
+            // in ARSoft.Tools.Net's UdpServerTransport for buffer tuning. This is safe because:
+            // 1. The field name is stable in the library version used.
+            // 2. Null checks and exception handling are in place.
+            // 3. No sensitive data is exposed or modified.
             var socketField = typeof(UdpServerTransport).GetField("_udpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (socketField != null)
             {

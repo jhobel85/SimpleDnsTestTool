@@ -30,7 +30,7 @@ public class DnsRecordManger : IDnsRecordManger
             if (domain.StartsWith(key, StringComparison.Ordinal))
             {
                 string str = domain.Substring(key.Length);
-                if (str.Length == 0 || str.StartsWith(".", StringComparison.Ordinal))
+                if (str.Length == 0 || str.StartsWith('.'))
                     return kvp.Value;
             }
         }

@@ -14,7 +14,7 @@ public static class ClientUtils
         client.Connect(dns_ip, port);
         var query = BuildDnsQuery(domain);
         await client.SendAsync(query, query.Length);
-        var receiveTask = client.ReceiveAsync();
+        var receiveTask = client.ReceiveAsync(cancellationToken).AsTask();
         try
         {
             var completedTask = await Task.WhenAny(receiveTask, Task.Delay(ClientTimeout, cancellationToken));
@@ -40,7 +40,7 @@ public static class ClientUtils
         client.Connect(dns_ip, port);
         var query = BuildDnsQueryAAAA(domain);
         await client.SendAsync(query, query.Length);
-        var receiveTask = client.ReceiveAsync();
+        var receiveTask = client.ReceiveAsync(cancellationToken).AsTask();
         try
         {
             var completedTask = await Task.WhenAny(receiveTask, Task.Delay(ClientTimeout, cancellationToken));
