@@ -20,7 +20,7 @@ namespace SimpleDnsServer.Tests
             // Arrange: Register domain (assumes server is already running via fixture)
             string dns_ip = DnsConst.GetDnsIp();
             var dnsClient = new RestClient(dns_ip, DnsConst.ApiPort);
-            await dnsClient.RegisterAsync(TestDomain_V4, TestIp_V4);
+            await dnsClient.RegisterAsync(TestDomain_V4, TestIp_V4, true);
             // Act: Send DNS query
             var resolvedIp = await ClientUtils.SendDnsQueryIPv4Async(dns_ip, TestDomain_V4, DnsConst.UdpPort);
 
@@ -33,8 +33,8 @@ namespace SimpleDnsServer.Tests
         {
             // Arrange: Register domain (assumes server is already running via fixture)
             string dns_ip = DnsConst.GetDnsIpV6();
-            var dnsClient = new RestClient(dns_ip, DnsConst.ApiPort, useIPv6: true);
-            await dnsClient.RegisterAsync(TestDomain_V6, TestIp_V6);
+            var dnsClient = new RestClient(dns_ip, DnsConst.ApiPort);
+            await dnsClient.RegisterAsync(TestDomain_V6, TestIp_V6, true);
 
             // Act: Send DNS query (AAAA record)
             var resolvedIp = await ClientUtils.SendDnsQueryIPv6Async(dns_ip, TestDomain_V6, DnsConst.UdpPort);

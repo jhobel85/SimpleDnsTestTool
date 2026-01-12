@@ -10,16 +10,16 @@ public class RestClient
     private readonly string serverUrl;
     private readonly IHttpClient httpClient;
 
-    public RestClient(string ip, int apiPort, bool useIPv6 = false, IHttpClient? httpClient = null)
+    public RestClient(string ip, int apiPort, IHttpClient? httpClient = null)
     {
-        serverUrl = BuildUrl(ip, apiPort, useIPv6);
+        serverUrl = BuildUrl(ip, apiPort);
         // Ensure /dns is always present as the base path
         if (!serverUrl.EndsWith(DnsConst.DNS_ROOT, StringComparison.OrdinalIgnoreCase))
             serverUrl += DnsConst.DNS_ROOT;
         this.httpClient = httpClient ?? new DefaultHttpClient();
     }
 
-    public async Task RegisterAsync(string domain, string ip, bool registerWithSessionContext = true)
+    public async Task RegisterAsync(string domain, string ip, bool registerWithSessionContext)
     {
         if (registerWithSessionContext)
         {
@@ -120,7 +120,7 @@ public class RestClient
         return int.TryParse(result, out var count) ? count : 0;
     }
 
-    private string BuildUrl(string ip, int apiPort, bool useIPv6)
+    private static string BuildUrl(string ip, int apiPort)
     {
         if (IPAddress.TryParse(ip, out var addr) && addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
             return $"http://[{ip}]:{apiPort}/{DnsConst.DncControllerName}";

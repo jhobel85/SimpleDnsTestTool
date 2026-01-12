@@ -8,8 +8,8 @@ public class DefaultProcessManager : IProcessManager
 {
     public HashSet<int> FindServerProcessIDs(int portNr, string? ipAddress = null)
     {
-        HashSet<int> ret = new HashSet<int>();
-        string cmdArg = "/C netstat -ano | findstr \":" + portNr + "\"";
+        HashSet<int> result = [];
+        string cmdArg = "/C netstat -ano | findstr ':" + portNr + "\"";
         var startInfo = new ProcessStartInfo()
         {
             Arguments = cmdArg.Trim(),
@@ -31,37 +31,28 @@ public class DefaultProcessManager : IProcessManager
                 var line = stdOut.ReadLine();
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
-                var lineClean = line.Replace("  ", " ");
-                var splitResult = lineClean.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+                var splitResult = CleanAndSplitLine(line);
                 if (splitResult.Length < 2)
                     continue;
-                string strIpAndPort = splitResult[1];
-                string? ip = null;
-                string? port = null;
-                int lastColon = strIpAndPort.LastIndexOf(':');
-                if (lastColon > 0)
+                if (TryParseIpAndPort(splitResult[1], out string? ip, out string? port))
                 {
-                    port = strIpAndPort[(lastColon + 1)..];
-                    ip = strIpAndPort[..lastColon];
-                    if (ip.StartsWith("[") && ip.EndsWith("]"))
-                        ip = ip[1..^1];
-                }
-                if (string.IsNullOrEmpty(ip) || string.IsNullOrEmpty(port))
-                    continue;
-                if (!int.TryParse(port, out int foundPortNr))
-                    continue;
-                string normIp = ip;
-                string? normArgIp = ipAddress;
-                if (!string.IsNullOrEmpty(ipAddress))
-                {
-                    try { normIp = System.Net.IPAddress.Parse(ip).ToString(); } catch { }
-                    try { normArgIp = System.Net.IPAddress.Parse(ipAddress).ToString(); } catch { }
-                }
-                if (foundPortNr == portNr && (ipAddress == null || normIp == normArgIp))
-                {
-                    string strProcessNr = splitResult[^1];
-                    if (int.TryParse(strProcessNr, out int intProcessNr))
-                        ret.Add(intProcessNr);
+                    if (string.IsNullOrEmpty(ip) || string.IsNullOrEmpty(port))
+                        continue;
+                    if (!int.TryParse(port, out int foundPortNr))
+                        continue;
+                    string normIp = ip;
+                    string? normArgIp = ipAddress;
+                    if (!string.IsNullOrEmpty(ipAddress))
+                    {
+                        try { normIp = System.Net.IPAddress.Parse(ip).ToString(); } catch { /* ignored: invalid IP */ }
+                        try { normArgIp = System.Net.IPAddress.Parse(ipAddress).ToString(); } catch { /* ignored: invalid IP */ }
+                    }
+                    if (foundPortNr == portNr && (ipAddress == null || normIp == normArgIp))
+                    {
+                        string strProcessNr = splitResult[^1];
+                        if (int.TryParse(strProcessNr, out int intProcessNr))
+                            result.Add(intProcessNr);
+                    }
                 }
             }
             cmdError = stdErr.ReadToEnd();
@@ -74,7 +65,30 @@ public class DefaultProcessManager : IProcessManager
         }
         if (!string.IsNullOrEmpty(cmdError))
             Console.WriteLine("Process returned error: " + cmdError);
-        return ret;
+        return result;
+    }
+
+    private static string[] CleanAndSplitLine(string line)
+    {
+        // Replace multiple spaces with single space, then split
+        while (line.Contains("  "))
+            line = line.Replace("  ", " ");
+        return line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    private static bool TryParseIpAndPort(string strIpAndPort, out string? ip, out string? port)
+    {
+        ip = null;
+        port = null;
+        int lastColon = strIpAndPort.LastIndexOf(':');
+        if (lastColon > 0)
+        {
+            port = strIpAndPort[(lastColon + 1)..];
+            ip = strIpAndPort[..lastColon];
+            if (ip.StartsWith('[') && ip.EndsWith(']'))
+                ip = ip[1..^1];
+        }
+        return ip != null && port != null;
     }
 
     private static bool KillProcessAsAdmin(int pid)

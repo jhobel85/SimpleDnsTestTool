@@ -17,7 +17,7 @@ public class DefaultDnsQueryHandler : IDnsQueryHandler
 
     public Task<DnsMessageBase?> HandleQueryAsync(DnsMessage query)
     {
-        logger.LogDebug($"Received DNS query: {query.Questions.FirstOrDefault()?.Name}");
+        logger.LogDebug("Received DNS query: {QueryName}", query.Questions.FirstOrDefault()?.Name);
         DnsMessage responseInstance = query.CreateResponseInstance();
         if (query.Questions.Count == 1)
         {
@@ -48,7 +48,7 @@ public class DefaultDnsQueryHandler : IDnsQueryHandler
         {
             responseInstance.ReturnCode = ReturnCode.ServerFailure;
         }
-        logger.LogDebug($"DNS response: {responseInstance.AnswerRecords.Count} answers");
+        logger.LogDebug("DNS response: {AnswerCount} answers", responseInstance.AnswerRecords.Count);
         return Task.FromResult<DnsMessageBase?>(responseInstance);
     }
 }

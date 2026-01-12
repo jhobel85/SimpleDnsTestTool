@@ -3,11 +3,11 @@ namespace SimpleDnsServer;
 
 public class Startup
 {
-    private IConfiguration configuration;
+    private readonly IConfiguration configuration;
 
     public Startup(IConfiguration configuration) => this.configuration = configuration;
 
-    public void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
     #pragma warning disable IL2026
 #pragma warning disable IL2026
@@ -38,7 +38,7 @@ public class Startup
         );
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         if (HostEnvironmentEnvExtensions.IsDevelopment((IHostEnvironment)env))
             DeveloperExceptionPageExtensions.UseDeveloperExceptionPage(app);

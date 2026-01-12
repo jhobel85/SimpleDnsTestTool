@@ -21,7 +21,7 @@ namespace SimpleDnsTests
         public void Register_ReturnsOk()
         {
             var result = _controller.Register("example.com", "1.2.3.4");
-            _mockRecordManager.Verify(m => m.Register("example.com", "1.2.3.4"), Times.Once);
+            _mockRecordManager.Verify(m => m.Register("example.com", "1.2.3.4", null), Times.Once);
             Assert.IsType<OkResult>(result);
         }
 

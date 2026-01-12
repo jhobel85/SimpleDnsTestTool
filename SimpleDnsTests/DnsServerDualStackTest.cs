@@ -20,11 +20,11 @@ namespace SimpleDnsServer.Tests
             string dns_ip_v4 = DnsConst.GetDnsIp(DnsIpMode.Localhost);
             string dns_ip_v6 = DnsConst.GetDnsIpV6(DnsIpMode.Localhost);
             var dnsClientV4 = new RestClient(dns_ip_v4, DnsConst.ApiPort);
-            var dnsClientV6 = new RestClient(dns_ip_v6, DnsConst.ApiPort, useIPv6: true);
+            var dnsClientV6 = new RestClient(dns_ip_v6, DnsConst.ApiPort);
 
             // Register both records
-            await dnsClientV4.RegisterAsync(TestDomain_V4, TestIp_V4);
-            await dnsClientV6.RegisterAsync(TestDomain_V6, TestIp_V6);
+            await dnsClientV4.RegisterAsync(TestDomain_V4, TestIp_V4, true);
+            await dnsClientV6.RegisterAsync(TestDomain_V6, TestIp_V6, true);
 
             // Act
             var resolvedIpV4 = await ClientUtils.SendDnsQueryIPv4Async(dns_ip_v4, TestDomain_V4, DnsConst.UdpPort);
@@ -70,11 +70,11 @@ namespace SimpleDnsServer.Tests
             string dns_ip_v4 = DnsConst.GetDnsIp(DnsIpMode.Localhost);
             string dns_ip_v6 = DnsConst.GetDnsIpV6(DnsIpMode.Localhost);
             var dnsClientV4 = new RestClient(dns_ip_v4, DnsConst.ApiPort);
-            var dnsClientV6 = new RestClient(dns_ip_v6, DnsConst.ApiPort, useIPv6: true);
+            var dnsClientV6 = new RestClient(dns_ip_v6, DnsConst.ApiPort);
 
             // Register all records in parallel
-            var registerTasks = ipv4Domains.Select(d => dnsClientV4.RegisterAsync(d.domain, d.ip))
-                .Concat(ipv6Domains.Select(d => dnsClientV6.RegisterAsync(d.domain, d.ip)));
+            var registerTasks = ipv4Domains.Select(d => dnsClientV4.RegisterAsync(d.domain, d.ip, true))
+                .Concat(ipv6Domains.Select(d => dnsClientV6.RegisterAsync(d.domain, d.ip, true)));
             await Task.WhenAll(registerTasks);
 
             try
