@@ -1,7 +1,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Xunit;
-using DnsClientMacro;
+using DnsClient;//Macro;
 
 namespace DualstackDnsServer.Tests
 {    

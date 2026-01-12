@@ -5,7 +5,7 @@ namespace DnsClient;
 
 public class DefaultHttpClient : IHttpClient
 {
-    private static readonly HttpClient httpClient = new(new InsecureHttpClientHandler());
+    private static readonly HttpClient httpClient = new(new HttpClientHandler());
 
     public Task<HttpResponseMessage> GetAsync(string url)
         => httpClient.GetAsync(url);

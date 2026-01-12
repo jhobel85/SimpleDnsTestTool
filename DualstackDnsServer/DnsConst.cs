@@ -81,10 +81,14 @@ public static class DnsConst
     public static string ResolveApiPort(IConfigurationRoot config) => config[apiPortKey] ?? ApiHttp.ToString();
     public static string ResolveUdpPort(IConfiguration config) => config[udpPortKey] ?? UdpPort.ToString();
 
+    
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S4423", Justification = "HTTP is used only for local development and testing; HTTPS is enforced in production.")]
     public static string ResolveHttpUrl(IConfigurationRoot config)
     {
+#pragma warning disable S4423 // HTTP is used only for local development and testing; HTTPS is enforced in production.
         string ipRes = ResolveDnsIp(config);
         return $"http://{ipRes}:{ApiHttp}";
+#pragma warning restore S4423
     }
 
     public static string ResolveHttpsUrl(IConfigurationRoot config)
@@ -93,10 +97,13 @@ public static class DnsConst
         return $"https://{ipRes}:{ApiHttps}";
     }
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S4423", Justification = "HTTP is used only for local development and testing; HTTPS is enforced in production.")]
     public static string ResolveHttpUrlV6(IConfigurationRoot config)
     {
-        string ipRes = ResolveDnsIpV6(config);
-        return $"http://[{ipRes}]:{ApiHttp}";
+#pragma warning disable S4423 // HTTP is used only for local development and testing; HTTPS is enforced in production.
+    string ipRes = ResolveDnsIpV6(config);
+    return $"http://[{ipRes}]:{ApiHttp}";
+#pragma warning restore S4423
     }
 
     public static string ResolveHttpsUrlV6(IConfigurationRoot config)
