@@ -123,7 +123,7 @@ public class RestClient
     private static string BuildUrl(string ip, int apiPort)
     {
         if (IPAddress.TryParse(ip, out var addr) && addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
-            return $"http://[{ip}]:{apiPort}/{DnsConst.DncControllerName}";
-        return $"http://{ip}:{apiPort}/{DnsConst.DncControllerName}";
+            return $"https://[{ip}]:{apiPort}/{DnsConst.DncControllerName}";
+        return $"https://{ip}:{apiPort}/{DnsConst.DncControllerName}";
     }
 }

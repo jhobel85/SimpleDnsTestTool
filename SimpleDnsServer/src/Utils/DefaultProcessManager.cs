@@ -10,18 +10,21 @@ public class DefaultProcessManager : IProcessManager
     {
         HashSet<int> result = [];
         string cmdArg = $"/C netstat -ano | findstr ':{portNr}";
+        // Restrict PATH to fixed, unwriteable system directories
+        //runs with a minimal, fixed, non-writable PATH
+        string system32 = Environment.GetFolderPath(Environment.SpecialFolder.System); // typically C:\Windows\System32
+        string cmdFullPath = Path.Combine(system32, "cmd.exe");
+
         var startInfo = new ProcessStartInfo()
         {
             Arguments = cmdArg.Trim(),
-            FileName = @"cmd.exe",
+            FileName = cmdFullPath,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
             UseShellExecute = false
         };
-        // Set PATH to only fixed, unwriteable directories for security
-        //improved security. This prevents execution of malicious binaries from user-writable locations.
-        startInfo.Environment["PATH"] = @"C:\Windows\System32;C:\Windows";
+
         string cmdError = string.Empty;
         try
         {
@@ -108,15 +111,18 @@ public class DefaultProcessManager : IProcessManager
         string arg = @"/c taskkill /f" + " /pid " + pid;
         try
         {
-            ProcessStartInfo processInf = new("cmd")
+            // Restrict PATH to fixed, unwriteable system directories
+            string system32 = Environment.GetFolderPath(Environment.SpecialFolder.System); // typically C:\Windows\System32
+            string cmdFullPath = Path.Combine(system32, "cmd.exe");
+
+            ProcessStartInfo processInf = new(cmdFullPath)
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 Verb = "runas",
                 Arguments = arg
             };
-            // Set PATH to only fixed, unwriteable directories for security
-            processInf.Environment["PATH"] = @"C:\Windows\System32;C:\Windows";
+            
             var proc = Process.Start(processInf);
             if (proc != null && proc.HasExited)
                 Console.WriteLine("Process ID " + pid + " killed by admin rights.");

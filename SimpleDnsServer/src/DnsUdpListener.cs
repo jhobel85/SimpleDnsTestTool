@@ -37,6 +37,7 @@ public class DnsUdpListener : BackgroundService
         udpServer.QueryReceived += new AsyncEventHandler<QueryReceivedEventArgs>(OnQueryReceived);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011", Justification = "Reflection is required to tune ARSoft.Tools.Net UDP buffer; field is stable and access is safe in this context.")]
     private void SetUdpSocketBufferSafe(UdpServerTransport transport)
     {
         try

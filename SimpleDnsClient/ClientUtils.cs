@@ -46,8 +46,7 @@ public static class ClientUtils
 
     public static byte[] BuildDnsQueryGeneric(string domain, QueryType type)
     {
-        var rand = new Random();
-        ushort id = (ushort)rand.Next(0, ushort.MaxValue);
+        ushort id = (ushort)System.Security.Cryptography.RandomNumberGenerator.GetInt32(0, ushort.MaxValue + 1);
         var header = new byte[] {
                 (byte)(id >> 8), (byte)(id & 0xFF),
                 0x01, 0x00,

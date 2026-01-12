@@ -5,7 +5,7 @@ namespace SimpleDnsClient;
 
 public class DefaultHttpClient : IHttpClient
 {
-    private static readonly HttpClient httpClient = new();
+    private static readonly HttpClient httpClient = new(new InsecureHttpClientHandler());
 
     public Task<HttpResponseMessage> GetAsync(string url)
         => httpClient.GetAsync(url);

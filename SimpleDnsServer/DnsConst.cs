@@ -60,13 +60,13 @@ public static class DnsConst
     {
         string ipRes = ResolveDnsIp(config);
         string port = config[apiPortKey] ?? ApiPort.ToString();
-        return $"http://{ipRes}:{port}";
+        return $"https://{ipRes}:{port}";
     }
 
     public static string ResolveUrlV6(IConfigurationRoot config)
     {
         string ipRes = ResolveDnsIpV6(config);
         string port = config[apiPortKey] ?? ApiPort.ToString();
-        return $"http://[{ipRes}]:{port}";
+        return $"https://[{ipRes}]:{port}";
     }
 }
