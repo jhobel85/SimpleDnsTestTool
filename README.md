@@ -2,21 +2,23 @@
 
 SimpleDnsTestTool is a dual-stack DNS server and client toolkit designed for testing and development. It supports both IPv4 and IPv6 traffic, allowing reliable DNS record registration, resolution, and unregistration. The project emphasizes test stability and reliability through async/await patterns, ensuring operations complete in order and tests run consistently across network stacks.
 
-# SimpleDnsServer
+# DualstackDnsServer
 
-Definition: Dual-stack means the server can handle both IPv4 and IPv6 traffic, ideally on the same port.
+Dual-stack means the server can handle both IPv4 and IPv6 traffic, ideally on the same port.
 
 Reliable Registration: By awaiting async registration methods, you ensure that a DNS record is fully registered before sending a DNS query. This prevents timing issues where a query might be sent before the server is ready, which is especially important when running tests for both IPv4 and IPv6.
 
 Test Stability: Async/await ensures that each step (register, resolve, unregister) completes in order, making your dual-stack tests pass consistently.
 
 # How to start the server
-1] Default run: SimpleDnsServer.exe
-- IPv4 will be localhost 172.0.0.1, UDP port 53 and API port 60
-- IPv6 will be localhost [::1], UDP port 53 and API port 60
-2] Custom run: SimpleDnsServer.exe --ip 192.168.50.1 --ip6 fd00:50::1 --apiPort 10053 --udpPort 10060
+1] Default run: DualstackDnsServer.exe
+- IPv4 will be localhost 172.0.0.1, UDP port 53 and API port 44360 (HTTPS)
+- IPv6 will be localhost [::1], UDP port 53 and API port 44360 (HTTPS)
+- HTTP disabled by default
+2] Custom run: DualstackDnsServer.exe --ip 192.168.50.1 --ip6 fd00:50::1 --apiPort 10053 --udpPort 10060 --http true
 - custom IPv4 and IPv6
 - custom ports
+- HTTP can be enabled by "--http true", will always run on port 60
 - If any of parameters not be specified default values be used.
 
 
