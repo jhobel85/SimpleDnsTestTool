@@ -87,14 +87,49 @@ public class DnsUdpClientService : IDnsUdpClientService
 
     public static string ParseDnsResponseForARecord(byte[] response)
     {
-        int answerStart = response.Length - 4;
-        return string.Join(".", response.Skip(answerStart).Take(4));
+        return ParseAnswer(response, 1, 4, bytes => string.Join(".", bytes));
     }
-
     public static string ParseDnsResponseForAAAARecord(byte[] response)
     {
-        int answerStart = response.Length - 16;
-        var bytes = response.Skip(answerStart).Take(16).ToArray();
-        return new IPAddress(bytes).ToString();
+        return ParseAnswer(response, 28, 16, bytes => new IPAddress(bytes.ToArray()).ToString());
+    }
+    
+    private static string ParseAnswer(byte[] response, int desiredType, int expectedLength, Func<IEnumerable<byte>, string> projector)
+    {
+        if (response.Length < 12) return string.Empty;
+        int anCount = (response[6] << 8) | response[7];
+        int ptr = 12;
+        // Skip QNAME
+        while (ptr < response.Length && response[ptr] != 0) ptr += response[ptr] + 1;
+        if (ptr >= response.Length) return string.Empty;
+        ptr++; // null label
+        ptr += 4; // QTYPE + QCLASS
+        for (int i = 0; i < anCount; i++)
+        {
+            if (ptr >= response.Length) return string.Empty;
+            // NAME
+            if ((response[ptr] & 0xC0) == 0xC0)
+            {
+                ptr += 2;
+            }
+            else
+            {
+                while (ptr < response.Length && response[ptr] != 0) ptr += response[ptr] + 1;
+                ptr++;
+            }
+            if (ptr + 10 > response.Length) return string.Empty;
+            ushort type = (ushort)(response[ptr] << 8 | response[ptr + 1]);
+            ptr += 2; // TYPE
+            ptr += 2; // CLASS
+            ptr += 4; // TTL
+            ushort rdlength = (ushort)(response[ptr] << 8 | response[ptr + 1]);
+            ptr += 2;
+            if (type == desiredType && rdlength == expectedLength && ptr + expectedLength <= response.Length)
+            {
+                return projector(response.Skip(ptr).Take(expectedLength));
+            }
+            ptr += rdlength;
+        }
+        return string.Empty;
     }
 }

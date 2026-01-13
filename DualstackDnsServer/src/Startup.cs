@@ -28,6 +28,7 @@ public class Startup
         .AddJsonOptions(options =>
         {
         options.JsonSerializerOptions.TypeInfoResolverChain.Add(DualstackDnsServer.DnsJsonContext.Default);
+        options.JsonSerializerOptions.TypeInfoResolverChain.Add(new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver());
         });
 #pragma warning restore IL2026
         services.AddHostedService<DnsUdpListener>(sp => new DnsUdpListener(

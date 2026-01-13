@@ -23,7 +23,7 @@ namespace DualstackDnsServer
             public async Task Query_Endpoint_ResolvesIPv4OrIPv6_DomainOnly()
             {
                 // Register IPv4
-                var registerV4 = await _client.PostAsync($"/dns/register?domain={my_domain}&ip=1.2.3.4", null);
+                var registerV4 = await _client.PostAsync($"/dns/register?domain={my_domain}&ip=192.168.3.4", null);
                 
                 registerV4.EnsureSuccessStatusCode();
                 await Task.Delay(100); // allow registration to settle
@@ -32,7 +32,7 @@ namespace DualstackDnsServer
                 var response = await _client.GetAsync($"/dns/query?domain={my_domain}");
                 var content = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"[TEST] Query default response: status={response.StatusCode}, body={content}");
-                Assert.Contains("1.2.3.4", content);
+                Assert.Contains("192.168.3.4", content);
 
                 // Register IPv6 (and IPVv4)
                 var registerV6 = await _client.PostAsync($"/dns/register?domain={my_domain}&ip=2001:db8::2", null);
