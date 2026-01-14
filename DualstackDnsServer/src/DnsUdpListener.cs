@@ -17,12 +17,14 @@ public class DnsUdpListener : BackgroundService
     private readonly IDnsQueryHandler queryHandler;
     private static readonly SemaphoreSlim QuerySemaphore = new(16); // e.g., max 16 concurrent queries
     private readonly ILogger<DnsUdpListener> _logger;
+    private readonly ServerOptions _serverOptions;
 
-    public DnsUdpListener(IDnsQueryHandler queryHandler, IConfiguration config, ILogger<DnsUdpListener> logger)
+    public DnsUdpListener(IDnsQueryHandler queryHandler, IConfiguration config, ILogger<DnsUdpListener> logger, ServerOptions serverOptions)
     {
-        string ipString = DnsConst.ResolveDnsIp(config);
-        string ipStringV6 = DnsConst.ResolveDnsIpV6(config);
-        int port = int.Parse(DnsConst.ResolveUdpPort(config));
+        _serverOptions = serverOptions;
+        string ipString = _serverOptions.Ip;
+        string ipStringV6 = _serverOptions.IpV6;
+        int port = _serverOptions.UdpPort;
         this.queryHandler = queryHandler;
         _logger = logger;
 
@@ -62,10 +64,28 @@ public class DnsUdpListener : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+
         if (!stoppingToken.IsCancellationRequested)
-            udpServer.Start();
+        {
+            try
+            {
+                udpServer.Start();
+            }
+            catch (System.Net.Sockets.SocketException ex)
+            {
+                // Determine which IP failed
+                string failedIp = ex.Message.Contains(_serverOptions.IpV6) ? _serverOptions.IpV6 : _serverOptions.Ip;
+                _logger.LogWarning($"The address '{failedIp}' is not assigned to any local network adapter. You may get a SocketException (10049). Use 'ipconfig' to see your assigned IPs.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Could not start UDP server: {ex.Message}");
+            }
+        }
         else
+        {
             udpServer.Stop();
+        }
 
         // Keep the background service alive until cancellation is requested
         while (!stoppingToken.IsCancellationRequested)

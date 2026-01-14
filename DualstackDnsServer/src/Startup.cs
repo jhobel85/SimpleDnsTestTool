@@ -34,7 +34,8 @@ public class Startup
         services.AddHostedService<DnsUdpListener>(sp => new DnsUdpListener(
                 sp.GetRequiredService<IDnsQueryHandler>(),
                 sp.GetRequiredService<IConfiguration>(),
-                sp.GetRequiredService<ILogger<DnsUdpListener>>()
+                sp.GetRequiredService<ILogger<DnsUdpListener>>(),
+                sp.GetRequiredService<ServerOptions>()
             )
         );
     }

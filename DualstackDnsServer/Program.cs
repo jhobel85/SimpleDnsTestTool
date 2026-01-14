@@ -18,17 +18,6 @@ namespace DualstackDnsServer
             // Populate ServerOptions
             var ip = DnsConst.ResolveDnsIp(config);
             var ipV6 = DnsConst.ResolveDnsIpV6(config);
-            // Check if the IPs are assigned to any local adapter
-            bool ipv4Ok = string.IsNullOrWhiteSpace(ip) || ip == "0.0.0.0" || ip == "127.0.0.1" || System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
-                .SelectMany(nic => nic.GetIPProperties().UnicastAddresses)
-                .Any(addr => addr.Address.ToString() == ip);
-            bool ipv6Ok = string.IsNullOrWhiteSpace(ipV6) || ipV6 == "::" || ipV6 == "::1" || System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
-                .SelectMany(nic => nic.GetIPProperties().UnicastAddresses)
-                .Any(addr => addr.Address.ToString() == ipV6);
-            if (!ipv4Ok)
-                Console.WriteLine($"[WARNING] The IPv4 address '{ip}' is not assigned to any local network adapter. You may get a SocketException (10049). Use 'ipconfig' to see your assigned IPs.");
-            if (!ipv6Ok)
-                Console.WriteLine($"[WARNING] The IPv6 address '{ipV6}' is not assigned to any local network adapter. You may get a SocketException (10049). Use 'ipconfig' to see your assigned IPs.");
             var serverOptions = new ServerOptions
             {
                 Ip = ip,
