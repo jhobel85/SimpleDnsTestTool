@@ -6,8 +6,8 @@ namespace DualstackDnsServer
     public class DnsApiControllerIntegrationTest : IClassFixture<DnsServerFixture>
     {
         private readonly HttpClient _client;
-        private readonly string dns_ip_v4 = DnsConst.GetDnsIp(DnsIpMode.Localhost);
-        private readonly string dns_ip_v6 = DnsConst.GetDnsIpV6(DnsIpMode.Localhost);
+        private readonly string dns_ip_v4 = CliArgumentValidator.GetDnsIp(DnsIpMode.Localhost);
+        private readonly string dns_ip_v6 = CliArgumentValidator.GetDnsIpV6(DnsIpMode.Localhost);
         private readonly int udp_port = DnsConst.PortUdp;
         private readonly string my_domain = "mytest1234.local";
 

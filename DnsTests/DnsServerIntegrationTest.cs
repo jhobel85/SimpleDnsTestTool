@@ -21,7 +21,7 @@ namespace DnsTests;
         public async Task RegisterAndResolveDomain_ReturnsCorrectIPv4()
         {
             // Arrange: Register domain (assumes server is already running via fixture)
-            string dns_ip = DnsConst.GetDnsIp();
+            string dns_ip = CliArgumentValidator.GetDnsIp();
             var httpClient = new RestClient(dns_ip, DnsConst.PortHttp);
             await httpClient.RegisterAsync(TestDomain_V4, TestIp_V4, true);
             // Act: Send DNS query
@@ -42,7 +42,7 @@ namespace DnsTests;
         public async Task RegisterAndResolveDomain_ReturnsCorrectIPv6()
         {
             // Arrange: Register domain (assumes server is already running via fixture)
-            string dns_ip = DnsConst.GetDnsIpV6();
+            string dns_ip = CliArgumentValidator.GetDnsIpV6();
             var httpClient = new RestClient(dns_ip, DnsConst.PortHttp);
             await httpClient.RegisterAsync(TestDomain_V6, TestIp_V6, true);
 

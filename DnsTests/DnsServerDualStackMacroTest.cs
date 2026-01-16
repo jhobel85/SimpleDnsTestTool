@@ -17,8 +17,8 @@ namespace DnsTests;
         public async Task RegisterAndResolve_BothIPv4AndIPv6_Success()
         {
             // Arrange
-            string dns_ip_v4 = DnsConst.GetDnsIp(DnsIpMode.Localhost);
-            string dns_ip_v6 = DnsConst.GetDnsIpV6(DnsIpMode.Localhost);
+            string dns_ip_v4 = CliArgumentValidator.GetDnsIp(DnsIpMode.Localhost);
+            string dns_ip_v6 = CliArgumentValidator.GetDnsIpV6(DnsIpMode.Localhost);
             var httpClientV4 = new RestClient(dns_ip_v4, DnsConst.PortHttp);
             var httpClientV6 = new RestClient(dns_ip_v6, DnsConst.PortHttp);
             // Register both records
@@ -73,8 +73,8 @@ namespace DnsTests;
                 (domain: "multi6g.local", ip: "fd00::117")
             };
 
-            string dns_ip_v4 = DnsConst.GetDnsIp(DnsIpMode.Localhost);
-            string dns_ip_v6 = DnsConst.GetDnsIpV6(DnsIpMode.Localhost);
+            string dns_ip_v4 = CliArgumentValidator.GetDnsIp(DnsIpMode.Localhost);
+            string dns_ip_v6 = CliArgumentValidator.GetDnsIpV6(DnsIpMode.Localhost);
             var dnsClientV4 = new RestClient(dns_ip_v4, DnsConst.PortHttp);
             var dnsClientV6 = new RestClient(dns_ip_v6, DnsConst.PortHttp);
 
@@ -169,8 +169,8 @@ namespace DnsTests;
             {
                 //creatificate create by 'dotnet dev-certs https --trust' does not include by default IP (just localhost works)
                 string dns_host = protocol == "https"
-                    ? DnsConst.GetDnsHostname()
-                    : (useV6 ? DnsConst.GetDnsIpV6(DnsIpMode.Localhost) : DnsConst.GetDnsIp(DnsIpMode.Localhost));
+                    ? CliArgumentValidator.GetDnsHostname()
+                    : (useV6 ? CliArgumentValidator.GetDnsIpV6(DnsIpMode.Localhost) : CliArgumentValidator.GetDnsIp(DnsIpMode.Localhost));
                 string testDomain = useV6 ? "dualstack6.local" : "dualstack4.local";
                 string testIp = useV6 ? "fd00::101" : "192.168.1.101";
                 int apiPort = protocol == "https" ? DnsConst.PortHttps : DnsConst.PortHttp;

@@ -9,8 +9,8 @@ public class ServerManager : IServerManager
     {
         string root = GetSolutionRoot();
         var serverExe = GetServerExecutablePath(root);
-        var ip = GetDnsIp(DnsIpMode.Localhost, null);
-        var ip6 = GetDnsIpV6(DnsIpMode.Localhost, null);
+        var ip = CliArgumentValidator.GetDnsIp(DnsIpMode.Localhost, null);
+        var ip6 = CliArgumentValidator.GetDnsIpV6(DnsIpMode.Localhost, null);
         bool enabled = DEFAULT_ENABLE_HTTP;
         Console.WriteLine($"[DEBUG] DEFAULT_ENABLE_HTTP at test startup: {enabled}");
         StartDnsServer(serverExe, ip, ip6, PortHttps, PortHttp, PortUdp, enabled);

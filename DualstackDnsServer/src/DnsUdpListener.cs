@@ -22,7 +22,7 @@ public class DnsUdpListener : BackgroundService
     public DnsUdpListener(IDnsQueryHandler queryHandler, IConfiguration config, ILogger<DnsUdpListener> logger, ServerOptions serverOptions)
     {
         _serverOptions = serverOptions;
-        string ipString = string.IsNullOrWhiteSpace(_serverOptions.Ip) ? DnsConst.GetDnsIp() : _serverOptions.Ip;
+        string ipString = string.IsNullOrWhiteSpace(_serverOptions.Ip) ? CliArgumentValidator.GetDnsIp() : _serverOptions.Ip;
         string ipStringV6 = string.IsNullOrWhiteSpace(_serverOptions.IpV6) ? string.Empty : _serverOptions.IpV6;
         int port = _serverOptions.UdpPort;
         this.queryHandler = queryHandler;
