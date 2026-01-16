@@ -14,7 +14,7 @@ namespace DnsTests;
         private const string TestDomain_V6 = "test6.local";
         private const string TestIp_V6 = "fd00::100";
 
-        private readonly DnsServerFixture _fixture = fixture;        
+        private readonly DnsServerFixture _fixture = fixture;
 
 
         [Fact]
