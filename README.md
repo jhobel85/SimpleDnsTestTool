@@ -16,16 +16,19 @@ DualstackDnsServer.exe
 - IPv6: `[::1]`, UDP port `53`, HTTPS API port `443`
 - HTTP disabled by default
 
+
+## Run with custom IPv4 and http enabled
+
+- Please make sure the IP address is present (has been added) on the netowrk interface
+
+```sh
+DualstackDnsServer.exe --ip 192.168.10.1 --http true
+```
+
 ## Custom Run (double-dash arguments only)
 
 ```sh
 DualstackDnsServer.exe --ip 192.168.10.1 --ip6 fd00:10::1 --apiPort 8443 --udpPort 10053 --http true --cert "C:\mydns.local.pfx" --certPassw "P@ssw0rd!" --verbose true
-```
-
-## Run mostly used with custom IPv4 (!registered previously on the network card!)
-
-```sh
-DualstackDnsServer.exe --ip 192.168.10.1
 ```
 
 | Argument | Description | Default |
