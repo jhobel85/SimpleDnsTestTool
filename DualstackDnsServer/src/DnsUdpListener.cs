@@ -13,6 +13,7 @@ namespace DualstackDnsServer;
 
 public class DnsUdpListener : BackgroundService
 {
+    private const string LogPrefix = "[DnsUdpListener]";
     private readonly DnsServer udpServer;
     private readonly IDnsQueryHandler queryHandler;
     private static readonly SemaphoreSlim QuerySemaphore = new(500); // e.g., max 500 concurrent queries
@@ -72,7 +73,7 @@ public class DnsUdpListener : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[DnsUdpListener] Could not set UDP socket buffer size");
+            _logger.LogError(ex, "{Prefix} Could not set UDP socket buffer size", LogPrefix);
         }
     }
 
@@ -89,11 +90,11 @@ public class DnsUdpListener : BackgroundService
             {
                 // Determine which IP failed
                 string failedIp = ex.Message.Contains(_serverOptions.IpV6) ? _serverOptions.IpV6 : _serverOptions.Ip;
-                _logger.LogWarning($"The address '{failedIp}' is not assigned to any local network adapter. You may get a SocketException (10049). Use 'ipconfig' to see your assigned IPs.");
+                _logger.LogWarning("{Prefix} The address '{Ip}' is not assigned to any local network adapter. You may get a SocketException (10049). Use 'ipconfig' to see your assigned IPs.", LogPrefix, failedIp);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Could not start UDP server: {ex.Message}");
+                _logger.LogWarning("{Prefix} Could not start UDP server: {Message}", LogPrefix, ex.Message);
             }
         }
         else
@@ -122,7 +123,7 @@ public class DnsUdpListener : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[DnsUdpListener] Exception in query handler");
+                _logger.LogError(ex, "{Prefix} Exception in query handler", LogPrefix);
             }
         }
         finally

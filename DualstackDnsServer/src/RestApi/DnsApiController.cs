@@ -1,21 +1,34 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Linq;
 
 #nullable enable
+
 namespace DualstackDnsServer.RestApi;
 
 [ApiController]
 [Route("dns")]
-public class DnsApiController(IDnsRecordManger recordManger) : ControllerBase
+public class DnsApiController : ControllerBase
 {
-    private readonly IDnsRecordManger recordManger = recordManger;
+    //private const string LogPrefix = "[DnsApiController]";
+    private readonly IDnsRecordManger recordManger;    
+    private readonly ILogger<DnsApiController> _logger;
+
+    public DnsApiController(IDnsRecordManger recordManger, ILogger<DnsApiController> logger)
+    {
+        this.recordManger = recordManger;
+        this._logger = logger;
+    }
+
 
     [HttpPost("register")]
     public IActionResult Register(string domain, string ip)
     {
-        Console.WriteLine("Register domain: " + domain + " ip: " + ip);
+        //logs will be printed in recordManger to avoid duplicate loggings
+        //_logger.LogInformation("Register domain: {Domain} ip: {Ip}",  domain, ip);
         recordManger.Register(domain, ip);
-        return (IActionResult)Ok();
+        return Ok();
     }
 
     [HttpPost("register/bulk")]
@@ -27,70 +40,78 @@ public class DnsApiController(IDnsRecordManger recordManger) : ControllerBase
         return Ok(new { Registered = entries.Count() });
     }
 
+
     [HttpPost("register/session")]
     public IActionResult RegisterSession(string domain, string ip, string sessionId)
     {
-        Console.WriteLine("Register domain in session context: " + domain + " ip: " + ip);
+        //_logger.LogInformation("Register domain in session context: {Domain} ip: {Ip}",  domain, ip);
         recordManger.Register(domain, ip, sessionId);
-        return (IActionResult)Ok();
+        return Ok();
     }
+
 
     [HttpPost("unregister")]
     public IActionResult Unregister(string domain)
     {
-        Console.WriteLine("Unregister domain:" + domain);
+        //_logger.LogInformation("Unregister domain: {Domain}",  domain);
         recordManger.Unregister(domain);
-        return (IActionResult)Ok();
+        return Ok();
     }
+
 
     [HttpPost("unregister/session")]
     public IActionResult UnregisterSession(string sessionId)
     {
-        Console.WriteLine("Unregister session:" + sessionId);
+        //_logger.LogInformation("Unregister session: {SessionId}",  sessionId);
         recordManger.UnregisterSession(sessionId);
-        return (IActionResult)Ok();
+        return Ok();
     }
+
 
     [HttpDelete("unregister/all")]
     public IActionResult UnregisterAll()
     {
+        //_logger.LogInformation("Unregister all domains");
         recordManger.UnregisterAll();
-        return (IActionResult)Ok();
+        return Ok();
     }
+
 
     [HttpGet("resolve")]
     public IActionResult Resolve(string domain)
     {
-        Console.WriteLine("Resolve domain:" + domain);
+        //_logger.LogDebug("Resolve domain: {Domain}",  domain);
         string? str = recordManger.Resolve(domain);
-        Console.WriteLine("Ip is: " + str);
-        return (IActionResult)Ok(str ?? "");
+        //_logger.LogDebug("Ip is: {Ip}",  str);
+        return Ok(str ?? "");
     }
+
 
 
     [HttpGet("entries")]
     public ActionResult<IEnumerable<DnsEntryDto>> GetAllEntries()
     {
-        Console.WriteLine("Get all DNS entries");
+        //_logger.LogInformation("Get all DNS entries");
         var entries = recordManger.GetAllEntries();
         return Ok(entries);
     }
 
+
     [HttpGet("count")]
     public IActionResult RecordsCount()
     {
-        Console.WriteLine("Get records count");
+        //_logger.LogInformation("Get records count");
         int count = recordManger.GetCount();
-        Console.WriteLine("All records count is: " + count.ToString());
-        return (IActionResult)Ok((object)count);
+        //_logger.LogInformation("All records count is: {Count}",  count);
+        return Ok(count);
     }
 
     [HttpGet("count/session")]
     public IActionResult RecordsSessionCount(string sessionId)
     {
-        Console.WriteLine("Get records count of session:" + sessionId);
+        //_logger.LogInformation("Get records count of session: {SessionId}",  sessionId);
         int sessionCount = recordManger.GetSessionCount(sessionId);
-        Console.WriteLine("Records count of session is: " + sessionCount.ToString());
-        return (IActionResult)Ok((object)sessionCount);
+        //_logger.LogInformation("Records count of session is: {SessionCount}",  sessionCount);
+        return Ok(sessionCount);
     }
 }

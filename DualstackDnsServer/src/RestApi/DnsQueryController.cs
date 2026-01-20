@@ -12,6 +12,7 @@ namespace DualstackDnsServer.RestApi;
 [Route("dns/query")]
 public class DnsQueryController : ControllerBase
 {
+    private const string LogPrefix = "[DnsQueryController]";
     private readonly IDnsUdpClient _dnsUdpClient;
     private readonly ServerOptions? _serverOptions;
     private readonly ILogger<DnsQueryController> _logger;
@@ -32,8 +33,10 @@ public class DnsQueryController : ControllerBase
     /// <returns>Resolved IP address or error message.</returns>
     [HttpGet]
     [Route("")]
-    public async Task<IActionResult> Query(string domain, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Query(string domain, string? type = null, CancellationToken cancellationToken = default)
     {
+        domain = domain?.Trim().TrimEnd('.') ?? string.Empty;
+
         if (string.IsNullOrWhiteSpace(domain))
             return BadRequest("Domain is required.");
 
@@ -43,19 +46,50 @@ public class DnsQueryController : ControllerBase
 
         try
         {
-            // Service already tries AAAA then A; call once and classify the result
-            string resolvedIp = await _dnsUdpClient.QueryDnsAsync(domain, cancellationToken);
-            if (string.IsNullOrWhiteSpace(resolvedIp))
-                return NotFound($"No IP found for domain {domain}.");
-
-            if (IPAddress.TryParse(resolvedIp, out var parsedIp))
+            if (string.IsNullOrWhiteSpace(type))
             {
-                return parsedIp.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                    ? Ok(new { IPv6 = resolvedIp })
-                    : Ok(new { IPv4 = resolvedIp });
-            }
+                // Try both AAAA and A
+                string serverForV6 = !string.IsNullOrWhiteSpace(_serverOptions.IpV6)
+                    ? _serverOptions.IpV6
+                    : _serverOptions.Ip;
+                string serverForV4 = !string.IsNullOrWhiteSpace(_serverOptions.Ip)
+                    ? _serverOptions.Ip
+                    : _serverOptions.IpV6;
 
-            return Ok(new { IP = resolvedIp });
+                string ipv6 = string.IsNullOrWhiteSpace(serverForV6)
+                    ? string.Empty
+                    : await _dnsUdpClient.QueryDnsAsync(serverForV6, domain, _serverOptions.UdpPort, QueryType.AAAA, cancellationToken);
+
+                string ipv4 = string.IsNullOrWhiteSpace(serverForV4)
+                    ? string.Empty
+                    : await _dnsUdpClient.QueryDnsAsync(serverForV4, domain, _serverOptions.UdpPort, QueryType.A, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(ipv6) && !string.IsNullOrWhiteSpace(ipv4))
+                    return Ok(new { IPv4 = ipv4, IPv6 = ipv6 });
+                if (!string.IsNullOrWhiteSpace(ipv6))
+                    return Ok(new { IPv6 = ipv6 });
+                if (!string.IsNullOrWhiteSpace(ipv4))
+                    return Ok(new { IPv4 = ipv4 });
+                return NotFound($"No IP found for domain {domain}.");
+            }
+            else
+            {
+                QueryType qtype = type.ToUpper() == "AAAA" ? QueryType.AAAA : QueryType.A;
+                string selectedServer = qtype == QueryType.AAAA
+                    ? (!string.IsNullOrWhiteSpace(_serverOptions.IpV6) ? _serverOptions.IpV6 : _serverOptions.Ip)
+                    : (!string.IsNullOrWhiteSpace(_serverOptions.Ip) ? _serverOptions.Ip : _serverOptions.IpV6);
+                if (string.IsNullOrWhiteSpace(selectedServer))
+                    return BadRequest($"DNS server for {qtype} is required.");
+
+                string ip = await _dnsUdpClient.QueryDnsAsync(
+                    selectedServer,
+                    domain,
+                    _serverOptions.UdpPort,
+                    qtype,
+                    cancellationToken);
+                if (string.IsNullOrWhiteSpace(ip))
+                    return NotFound($"No IP found for domain {domain}.");
+                return Ok(qtype == QueryType.AAAA ? new { IPv6 = ip } : new { IPv4 = ip });
+            }
         }
         catch (Exception ex)
         {
@@ -72,32 +106,54 @@ public class DnsQueryController : ControllerBase
     /// <param name="type">Record type: A or AAAA (default: A).</param>
     /// <returns>Resolved IP address or error message.</returns>
     [HttpGet("server")]
-    public async Task<IActionResult> QueryWithServer(string domain, string dnsServer, int port, string type = "A", CancellationToken cancellationToken = default)
+    public async Task<IActionResult> QueryWithServer(string domain, string? dnsServer = null, int? port = null, string? type = null, CancellationToken cancellationToken = default)
     {
-        _logger?.LogInformation("[DnsQueryController] Entered Query(domain={domain}, dnsServer={dnsServer}, port={port}, type={type})", domain, dnsServer, port, type);
-        _logger?.LogInformation("[DnsQueryController] Entered Query action with domain={domain}, dnsServer={dnsServer}, port={port}, type={type}", domain, dnsServer, port, type);
+        _logger?.LogInformation("{Prefix} Entered Query action with domain={domain}, dnsServer={dnsServer}, port={port}, type={type}", LogPrefix, domain, dnsServer, port, type);
+        domain = domain?.Trim().TrimEnd('.') ?? string.Empty;
+
         if (string.IsNullOrWhiteSpace(domain))
             return BadRequest("Domain is required.");
-        
-        if (string.IsNullOrWhiteSpace(dnsServer))
+
+        string? effectiveServer = !string.IsNullOrWhiteSpace(dnsServer)
+            ? dnsServer
+            : (!string.IsNullOrWhiteSpace(_serverOptions?.IpV6) ? _serverOptions.IpV6 : _serverOptions?.Ip);
+        int effectivePort = port ?? _serverOptions?.UdpPort ?? 53;
+
+        if (string.IsNullOrWhiteSpace(effectiveServer))
             return BadRequest("DNS server is required.");
 
         try
         {
-            _logger?.LogInformation("[DnsQueryController] Before QueryDnsAsync");
-            QueryType qtype = type.ToUpper() == "AAAA" ? QueryType.AAAA : QueryType.A;
-            var queryTask = _dnsUdpClient.QueryDnsAsync(dnsServer, domain, port, qtype, cancellationToken);
-            _logger?.LogInformation("[DnsQueryController] Awaiting QueryDnsAsync");
-            string ip = await queryTask;
-            _logger?.LogInformation("[DnsQueryController] After QueryDnsAsync, ip={ip}", ip);
-            if (string.IsNullOrWhiteSpace(ip))
+            _logger?.LogInformation("{Prefix} Before QueryDnsAsync", LogPrefix);
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                // Try both AAAA and A
+                string ipv6 = await _dnsUdpClient.QueryDnsAsync(effectiveServer, domain, effectivePort, QueryType.AAAA, cancellationToken);
+                string ipv4 = await _dnsUdpClient.QueryDnsAsync(effectiveServer, domain, effectivePort, QueryType.A, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(ipv6) && !string.IsNullOrWhiteSpace(ipv4))
+                    return Ok(new { IPv4 = ipv4, IPv6 = ipv6 });
+                if (!string.IsNullOrWhiteSpace(ipv6))
+                    return Ok(new { IPv6 = ipv6 });
+                if (!string.IsNullOrWhiteSpace(ipv4))
+                    return Ok(new { IPv4 = ipv4 });
                 return NotFound($"No IP found for domain {domain}.");
-            return Ok(ip);
+            }
+            else
+            {
+                QueryType qtype = type.ToUpper() == "AAAA" ? QueryType.AAAA : QueryType.A;
+                var queryTask = _dnsUdpClient.QueryDnsAsync(effectiveServer, domain, effectivePort, qtype, cancellationToken);
+                _logger?.LogInformation("{Prefix} Awaiting QueryDnsAsync", LogPrefix);
+                string ip = await queryTask;
+                _logger?.LogInformation("{Prefix} After QueryDnsAsync, ip={ip}", LogPrefix, ip);
+                if (string.IsNullOrWhiteSpace(ip))
+                    return NotFound($"No IP found for domain {domain}.");
+                return Ok(ip);
+            }
         }
         catch (Exception ex)
         {
             var errorDetails = $"DNS query failed: {ex.Message}\nInner: {ex.InnerException?.Message}\nStack: {ex.StackTrace}";
-            _logger?.LogError(ex, errorDetails);
+            _logger?.LogError(ex, "{Prefix} {ErrorDetails}", LogPrefix, errorDetails);
             return StatusCode(500, errorDetails);
         }
     }    

@@ -40,9 +40,15 @@ public class DnsUdpClient : IDnsUdpClient
         if (!string.IsNullOrEmpty(domain) && domain.EndsWith("."))
             domain = domain.TrimEnd('.');
 
-        AddressFamily family = type == QueryType.A ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+        if (string.IsNullOrWhiteSpace(dnsServer))
+            throw new ArgumentException("DNS server address is required", nameof(dnsServer));
+
+        if (!IPAddress.TryParse(dnsServer, out var dnsIp))
+            throw new ArgumentException($"Invalid DNS server address: {dnsServer}", nameof(dnsServer));
+
+        var family = dnsIp.AddressFamily; // bind to the server's address family
         using var client = new UdpClient(family);
-        client.Connect(dnsServer, port);
+        client.Connect(dnsIp, port);
         var query = BuildDnsQueryGeneric(domain, type);
         await client.SendAsync(query, query.Length);
         var receiveTask = client.ReceiveAsync(cancellationToken).AsTask();

@@ -9,12 +9,14 @@ namespace DualstackDnsServer
     public class DnsApiControllerTest
     {
         private readonly Mock<IDnsRecordManger> _mockRecordManager;
+        private readonly Mock<Microsoft.Extensions.Logging.ILogger<DnsApiController>> _mockLogger;
         private readonly DnsApiController _controller;
 
         public DnsApiControllerTest()
         {
             _mockRecordManager = new Mock<IDnsRecordManger>();
-            _controller = new DnsApiController(_mockRecordManager.Object);
+            _mockLogger = new Mock<Microsoft.Extensions.Logging.ILogger<DnsApiController>>();
+            _controller = new DnsApiController(_mockRecordManager.Object, _mockLogger.Object);
         }
 
         [Fact]

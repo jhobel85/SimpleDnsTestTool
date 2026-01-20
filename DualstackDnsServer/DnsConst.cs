@@ -30,6 +30,8 @@ public static class DnsConst
     public const string certPathKey = "cert";
     public const string certPasswordKey = "certPassw";    
 
+    public const string helpKey = "h";
+
     public static readonly string[] verboseKeys = ["v", "verbose"];    
 
     private static HashSet<string> supportedKeys = new(StringComparer.OrdinalIgnoreCase)
@@ -42,6 +44,7 @@ public static class DnsConst
         portUdpKey,
         certPathKey,
         certPasswordKey,
+        helpKey,
         verboseKeys[0],//v
         verboseKeys[1]//verbose
     };

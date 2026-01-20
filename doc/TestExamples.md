@@ -62,28 +62,26 @@ curl.exe -X GET "https://localhost:443/dns/entries"
 curl.exe -X POST "https://localhost:443/dns/unregister?domain=example.com"
 ```
 
+### IPv6 
 
-### IPv6
-
-> **Note:** The following IPv6 examples require the server to be started with the `--ip6` argument.
+HTTP (if enabled with `--http true`)
 
 ```sh
 # Register
 curl.exe -X POST "https://localhost:443/dns/register?domain=example.com&ip=fd00:10::20"
+curl.exe -X POST "http://192.168.0.242:80/dns/register?domain=cpu30ipv6.local&ip=fd00::30"
 
 # Resolve
 curl.exe -X GET "https://localhost:443/dns/resolve?domain=example.com"
+curl.exe -X GET "http://192.168.0.242:80/dns/resolve?domain=cpu30ipv6.local"
+
+# Query
+curl.exe -X GET "http://192.168.0.242:80/dns/query?domain=cpu30ipv6.local."
+curl.exe "http://192.168.0.242:80/dns/query/server?domain=cpu30ipv6.local&type=AAAA&dnsServer=192.168.0.242&port=53"
 
 # List all entries (if HTTP enabled and IPv6 enabled)
 curl.exe -g -X GET "http://[::1]:80/dns/entries"
-```
-
-
-### HTTP (if enabled with `--http true`)
-
-```sh
-curl.exe -X POST "http://127.0.0.1:80/dns/register?domain=example.com&ip=192.168.10.21"
-curl.exe -X GET "http://127.0.0.1:80/dns/resolve?domain=example.com"
+curl.exe -g -X GET "http://192.168.0.242:80/dns/entries"
 ```
 
 ## Examples (PowerShell)

@@ -56,6 +56,24 @@ public static class CliArgumentValidator
         bool printedHelp = false;
         foreach (var arg in args)
         {
+            if (string.Equals(arg, "--h", StringComparison.OrdinalIgnoreCase) || string.Equals(arg, "--help", StringComparison.OrdinalIgnoreCase))
+            {
+                PrintHelp();
+                Environment.Exit(0);
+            }
+        }
+        foreach (var arg in args)
+        {
+            // If any argument starts with a single dash but not double dash, print help and exit
+            if (arg.StartsWith("-") && !arg.StartsWith("--"))
+            {
+                Console.WriteLine($"[ERROR] Invalid argument '{arg}'. All arguments must use double dashes (e.g., --ip, --portHttps).\n");
+                PrintHelp();
+                Environment.Exit(1);
+            }
+        }
+        foreach (var arg in args)
+        {
             if (!arg.StartsWith("--")) continue;
             var trimmed = arg.TrimStart('-');
             var key = trimmed.Split('=', 2, StringSplitOptions.RemoveEmptyEntries)[0];

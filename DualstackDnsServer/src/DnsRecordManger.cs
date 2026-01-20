@@ -1,23 +1,33 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 #nullable enable
 namespace DualstackDnsServer;
 
 public class DnsRecordManger : IDnsRecordManger
 {
+    private const string LogPrefix = "[DnsRecordManger]";
     private readonly ConcurrentDictionary<string, string> records = new();
     private readonly ConcurrentDictionary<string, ConcurrentBag<string>> sessions = new();
     private readonly object sessionLock = new();
-    public DnsRecordManger() => Console.WriteLine("Server new instance");
+    private readonly ILogger<DnsRecordManger> _logger;
+
+    public DnsRecordManger(ILogger<DnsRecordManger>? logger = null)
+    {
+        _logger = logger ?? NullLogger<DnsRecordManger>.Instance;
+        _logger.LogDebug("{Prefix} Server new instance", LogPrefix);
+    }
 
     public void Register(string domain, string ip, string? sessionId = null)
     {
         records[domain] = ip;
         if (sessionId == null)
+        {
+            _logger.LogInformation("Register domain {Domain} ip {Ip}", domain, ip);
             return;
+        }
+        _logger.LogInformation("Register domain {Domain} ip {Ip} session {SessionId}", domain, ip, sessionId);
         AddSessionItem(sessionId, domain);
     }
 
@@ -31,7 +41,17 @@ public class DnsRecordManger : IDnsRecordManger
         }
     }
 
-    public void Unregister(string domain) => records.TryRemove(domain, out _);
+    public void Unregister(string domain)
+    {
+        if (records.TryRemove(domain, out _))
+        {
+            _logger.LogInformation("Unregister domain {Domain}", domain);
+        }
+        else
+        {
+            _logger.LogDebug("{Prefix} Unregister domain {Domain} - not found", LogPrefix, domain);
+        }
+    }
 
     public string? Resolve(string domain)
     {
@@ -43,9 +63,14 @@ public class DnsRecordManger : IDnsRecordManger
             {
                 string str = domain.Substring(key.Length);
                 if (str.Length == 0 || str.StartsWith('.'))
+                {
+                    var recordType = kvp.Value?.Contains(':') == true ? "AAAA" : "A";
+                    _logger.LogDebug("{Prefix} Resolve domain {Domain} -> {Ip} ({RecordType})", LogPrefix, domain, kvp.Value, recordType);
                     return kvp.Value;
+                }
             }
         }
+        _logger.LogDebug("{Prefix} Resolve domain {Domain} -> <not found>", LogPrefix, domain);
         return null;
     }
 
@@ -61,10 +86,14 @@ public class DnsRecordManger : IDnsRecordManger
         lock (sessionLock)
         {
             if (!sessions.TryGetValue(sessionId, out var value))
+            {
+                _logger.LogDebug("{Prefix} Unregister session {SessionId} - not found", LogPrefix, sessionId);
                 return;
+            }
             foreach (string key in value)
                 records.TryRemove(key, out _);
             sessions.TryRemove(sessionId, out _);
+            _logger.LogInformation("Unregister session {SessionId} and its domains", sessionId);
         }
     }
 
@@ -72,6 +101,7 @@ public class DnsRecordManger : IDnsRecordManger
     {
         records.Clear();
         sessions.Clear();
+        _logger.LogInformation("Unregister all domains and sessions");
     }
 
     private void AddSessionItem(string key, string domain)

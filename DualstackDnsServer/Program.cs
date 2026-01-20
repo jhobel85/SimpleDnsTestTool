@@ -1,7 +1,9 @@
 
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Logging.Console;
 using DualstackDnsServer;
 using System.Net;
+using DualstackDnsServer.Logging;
 
 namespace DualstackDnsServer
 {
@@ -55,7 +57,8 @@ namespace DualstackDnsServer
                     builder.ConfigureLogging(logging =>
                     {
                         logging.ClearProviders();
-                        logging.AddConsole();
+                        logging.AddConsoleFormatter<MinimalConsoleFormatter, ConsoleFormatterOptions>();
+                        logging.AddConsole(options => options.FormatterName = MinimalConsoleFormatter.FormatterName);
                         logging.SetMinimumLevel(LogLevel.Debug);
                         logging.AddFilter((category, level) => level >= LogLevel.Debug);
                     });
