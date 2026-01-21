@@ -93,7 +93,8 @@ public class DnsQueryController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"DNS query failed: {ex.Message}");
+            // Return ObjectResult with 500 status code for test compatibility
+            return new ObjectResult($"DNS query failed: {ex.Message}") { StatusCode = 500 };
         }
     }
 

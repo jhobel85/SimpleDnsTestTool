@@ -43,8 +43,18 @@ public class DnsUdpClient : IDnsUdpClient
         if (string.IsNullOrWhiteSpace(dnsServer))
             throw new ArgumentException("DNS server address is required", nameof(dnsServer));
 
-        if (!IPAddress.TryParse(dnsServer, out var dnsIp))
-            throw new ArgumentException($"Invalid DNS server address: {dnsServer}", nameof(dnsServer));
+        IPAddress? dnsIp = null;
+        if (!IPAddress.TryParse(dnsServer, out dnsIp))
+        {
+            // Try to resolve hostname to IP (prefer IPv6 if type AAAA, else IPv4)
+            var addresses = await Dns.GetHostAddressesAsync(dnsServer, cancellationToken);
+            if (addresses == null || addresses.Length == 0)
+                throw new ArgumentException($"Could not resolve DNS server hostname: {dnsServer}", nameof(dnsServer));
+            if (type == QueryType.AAAA)
+                dnsIp = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetworkV6) ?? addresses.First();
+            else
+                dnsIp = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork) ?? addresses.First();
+        }
 
         var family = dnsIp.AddressFamily; // bind to the server's address family
         using var client = new UdpClient(family);

@@ -79,7 +79,12 @@ public class DnsQueryControllerTest
     {
         // Arrange
         var mockService = new Mock<IDnsUdpClient>();
-        mockService.Setup(s => s.QueryDnsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        mockService.Setup(s => s.QueryDnsAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<int>(),
+                It.IsAny<QueryType>(),
+                It.IsAny<CancellationToken>()))
             .ThrowsAsync(new System.Exception("fail"));
 
         var serverOptions = new ServerOptions { Ip = "8.8.8.8", IpV6 = "::1", UdpPort = PORT };
