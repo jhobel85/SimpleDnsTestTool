@@ -178,13 +178,6 @@ namespace DnsTests;
 
                 await httpClient.RegisterAsync(testDomain, testIp, true);
 
-                // Skip UDP DNS test for https, as 'localhost' is not a valid IP for UDP DNS
-                if (protocol == "https")
-                {
-                    await httpClient.UnregisterAsync(testDomain);
-                    return;
-                }
-
                 var serverOptions = new ServerOptions
                 {
                     Ip = dns_host,
